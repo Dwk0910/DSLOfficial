@@ -1,5 +1,17 @@
+@font-face {
+  font-family: 'SeoulNamsan';
+  src:url('./fonts/SeoulNamsan.ttf') format('truetype');
+  font-weight: 400;
+}
+
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  width: 100%;
+  height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -7,7 +19,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.contents {
+  display: flex;
+  width: 100%;
+  font-family: 'SeoulNamsan', sans-serif;
+  text-align: center;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* internal settings */
+.loginbtn:hover {
+  background-color: rgba(83, 197, 255, 0.25);
 }
