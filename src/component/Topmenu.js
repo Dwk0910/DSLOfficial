@@ -1,20 +1,13 @@
 import * as React from 'react';
-import { IoHome } from 'react-icons/io5';
-
 import './Topmenu.css';
 
 export default function Topmenu() {
     const menuArray = [
-        {
-            pid: 0,
-            title: "HOME",
-            icon: IoHome
-        },
-        {
-            pid: 1,
-            title: "스노우 병신",
-            icon: IoHome
-        }
+        { pid: 0, title: "HOME" },
+        { pid: 1, title: "공지" },
+        { pid: 2, title: "게시판" },
+        { pid: 3, title: "신청센터" },
+        { pid: 4, title: "자료실" }
     ];
 
     return (
@@ -23,21 +16,23 @@ export default function Topmenu() {
                 {
                     menuArray.map((item, idx) => {
                         let style = {
-                            marginLeft: (idx === 0) ? '0' : '5px',
+                            color: (idx === 0) ? 'green' : 'black',
+                            marginLeft: '5px',
                             cursor: 'pointer',
+                            fontFamily: '굴림, Gulim'
                         };
 
                         if (idx === 0 && window.location.search === "") style.fontWeight = 'bold';
-                        else if (window.location.search.includes("pid=" + idx)) style.fontWeight = 'bold';
+                        else if (window.location.search.includes("pid=" + item.pid)) style.fontWeight = 'bold';
 
                         const separater = (idx === menuArray.length - 1) ? "" : (
-                            <span> · </span>
+                            <span key={idx} style={{ borderRight: "1px solid #9C9C9C", marginLeft: '8px', marginRight: '8px' }}></span>
                         );
 
                         return (
-                            <React.Fragment>
-                                <span key={idx} className={"menu"} style={style} onClick={() => { window.location.assign("?pid=" + item.pid); }}>{ item.title }</span>
-                                <span style={{ marginLeft: '5px' }}>{ separater }</span>
+                            <React.Fragment key={item.pid}>
+                                <span key={item.title} className={"menu"} style={style} onClick={() => { window.location.assign("?pid=" + item.pid); }}>{ item.title }</span>
+                                <span key={separater.key} style={{ marginLeft: '5px' }}>{ separater }</span>
                             </React.Fragment>
                         );
                     })
