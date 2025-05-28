@@ -7,7 +7,9 @@ export default function Topmenu() {
         { pid: 1, title: "공지" },
         { pid: 2, title: "게시판" },
         { pid: 3, title: "신청센터" },
-        { pid: 4, title: "자료실" }
+        { pid: 4, title: "자료실" },
+        { pid: 5, title: "DSLHUB" },
+        { pid: 'S', title: 'DSLWiki'}
     ];
 
     return (
@@ -19,7 +21,7 @@ export default function Topmenu() {
                             color: (idx === 0) ? 'green' : 'black',
                             marginLeft: '5px',
                             cursor: 'pointer',
-                            fontFamily: '굴림, Gulim'
+                            fontFamily: 'suite, Gulim'
                         };
 
                         if (idx === 0 && window.location.search === "") style.fontWeight = 'bold';

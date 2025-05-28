@@ -7,13 +7,11 @@ import img_title from '../docs/title.png';
 import banner_1 from '../docs/banners/banner_1.png';
 
 // page import
+import Error404 from '../pages/Error404';
 import Main from '../pages/Main';
 import Notification from '../pages/Notification';
 
 function App() {
-    // Pre-set
-    document.title = "DSL OFFICIAL"
-
     if (window.location.search.includes("pid=0")) {
         window.location.assign('.');
     }
@@ -33,18 +31,28 @@ function App() {
     switch (getURLString('pid')) {
         case '0': page = <Main/>; break;
         case '1': page = <Notification/>; break;
-        default: page = <h1>Error 404</h1>; break;
+        case 'S': window.location.assign('https://dslwiki.kro.kr'); break;
+        default: page = <Error404/>; break;
     }
   return (
       <div style={{ width: '1000px', backgroundColor: 'white' }}>
-          <img src={img_title} alt="" style={{ width: "500px", marginLeft: '50px', cursor: 'pointer' }} onClick={() => {
-              window.location.assign('.');
-          }}/>
-          <span style={{ borderTop: '1px solid gray', marginBottom: '20px', display: 'flex', width: '100%' }}></span>
+          <div style={{ position: 'fixed', backgroundColor: 'white', width: '1000px', zIndex: '1' }}>
+              <img src={img_title} alt="" style={{ width: "500px", marginLeft: '50px', cursor: 'pointer' }} onClick={() => {
+                  window.location.assign('.');
+              }}/>
+              <span style={{ borderTop: '1px solid gray', display: 'flex', width: '100%' }}></span>
+          </div>
+          <div style={{ paddingTop: '80px' }}></div>
           {banner}
           <Topmenu/>
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '100%', minHeight: '70vh', display: 'flex', justifyContent: 'center' }}>
               {page}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'white', width: '100%', borderTop: '1px solid gray', marginTop: '10px', paddingTop: '25px', paddingBottom: '25px', color: 'black', fontFamily: 'suite' }}>
+              <span style={{ fontWeight: 'bold', fontSize: '1.5rem', marginLeft: '25px' }}>DSLWeb</span>
+              <span style={{ fontWeight: 'bold', marginLeft: '25px' }}>Designed by Dwk0910</span>
+              <span style={{ marginLeft: '25px' }}>Copyright 2025. DSL All rights reserved.</span>
+              <span style={{ marginLeft: '25px', marginTop: '10px', textDecoration: 'underline' }}>서버법률은 이곳에서도 똑같이 적용받습니다. 글 작성에 유의해주세요!</span>
           </div>
       </div>
   );
