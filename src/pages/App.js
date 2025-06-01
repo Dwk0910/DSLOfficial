@@ -12,9 +12,7 @@ import Main from '../pages/Main';
 import Notification from '../pages/Notification';
 
 function App() {
-    if (window.location.search.includes("pid=0")) {
-        window.location.assign('.');
-    }
+    if (window.location.search.includes("pid=0")) window.location.assign('.');
 
     const bannerMap = {
         img: banner_1,
