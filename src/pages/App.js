@@ -16,7 +16,7 @@ function App() {
 
     const bannerMap = {
         img: banner_1,
-        link: '.?pid=1&read=1'
+        link: '.?pid=1&t=1'
     };
 
     let banner = (
@@ -30,6 +30,7 @@ function App() {
         case '0': page = <Main/>; break;
         case '1': page = <Notification/>; break;
         case 'S': window.location.assign('https://dslwiki.kro.kr'); break;
+        case 'er404': page = <Error404/>; break;
         default: page = <Error404/>; break;
     }
   return (
