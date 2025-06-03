@@ -1,12 +1,13 @@
 import * as React from 'react';
 import notification_banner from '../docs/banners/notification_banner.png';
 
-import { getURLString } from "../Util";
+import { getURLString, LocalStorage } from "../Util";
 import { useState } from 'react';
 import MDEdit from '@uiw/react-md-editor';
 
 export default function Notification() {
     document.title = "DSL OFFICIAL - 공지";
+    const ls = LocalStorage();
 
     let postComponentList = [];
     const postList = [
@@ -43,6 +44,11 @@ export default function Notification() {
 
     const target = getURLString("t");
      if (target === 'n') {
+         if (ls.get("id") === null) {
+             alert("Error 403 Forbidden : 당신은 이 페이지에 접근할 권한이 없습니다.");
+             window.location.assign(".?pid=1");
+         }
+
          document.title = "DSL OFFICIAL - 공지 [새로운 게시글 작성]";
          document.documentElement.setAttribute('data-color-mode', 'light');
          return (
@@ -53,7 +59,7 @@ export default function Notification() {
                          <span className={"hoverstyle"} style={{ marginBottom: '5px', fontFamily: 'suite' }} onClick={() => window.location.assign(".?pid=1")}>{"← 돌아가기"}</span>
                      </div>
                      <input type={"text"} style={{ fontFamily: 'suite', fontSize: '1.8rem', fontWeight: 'bold', padding: '1%', width: '97.8%', marginTop: '10px', border: '1px solid gray' }} placeholder={"제목을 입력해 주세요"}  />
-                     <MDEdit style={{ marginTop: '30px', minHeight: '700px' }}
+                     <MDEdit style={{ marginTop: '30px', minHeight: '500px' }}
                              value={mdValue}
                              onChange={mdSetValue}
                              textareaProps={{
@@ -113,11 +119,11 @@ export default function Notification() {
             i++;
         });
 
-        const addbtn = (
+        const addbtn = (ls.get("id") !== null) ? (
             <div style={{ width: '97.33%', marginTop: '15px', marginBottom: '15px', display: 'flex', justifyContent: 'left' }}>
                 <input type={"button"} value={"게시글 추가"} style={{ fontSize: '1.03rem', fontFamily: 'suite', padding: '10px', cursor: 'pointer' }} onClick={() => {window.location.assign(".?pid=1&t=n")}}/>
             </div>
-        );
+        ) : (<div></div>);
 
         return (
             <div style={{ width: '100%', marginTop: '20px', marginLeft: '45px', marginRight: '45px', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>

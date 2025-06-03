@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { getURLString } from "../Util";
+import $ from 'jquery';
+import { getURLString, LocalStorage } from "../Util";
 
 import Topmenu from '../component/Topmenu';
 
@@ -13,6 +14,27 @@ import Notification from '../pages/Notification';
 
 function App() {
     if (window.location.search.includes("pid=0")) window.location.assign('.');
+
+    // 미리 등록된 LocalStorage에 대해 Validation
+    const ls = LocalStorage();
+    if (ls.get("id") !== null && ls.get("pwd") !== null) {
+        $.ajax({
+            type: "POST",
+            url: "https://neatorebackend.kro.kr/dslofficial/login",
+            contentType: "application/json; charset=utf-8",
+            data: `{"id":"${ls.get("id")}", "pwd":"${ls.get("pwd")}"}`
+        }).then((e) => {
+            if (JSON.parse(e).status !== "true") {
+                // ls에 등록된 id/pwd가 잘못됨 <- 악용 방지 및 비밀번호 변경 시 자동로그인 해제
+                ls.remove("id");
+                ls.remove("pwd");
+            }
+        });
+    } else {
+        // 둘 중에 하나가 없는 것이므로 둘다 제거
+        ls.remove("id");
+        ls.remove("pwd");
+    }
 
     const bannerMap = {
         img: banner_1,
