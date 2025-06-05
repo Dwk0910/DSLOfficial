@@ -8,7 +8,8 @@ export default function Topmenu() {
         { pid: 2, title: "게시판" },
         { pid: 3, title: "신청센터" },
         { pid: 4, title: "자료실" },
-        { pid: 5, title: "DSLHUB" },
+        { pid: 5, title: "DDM" },
+        { pid: 6, title: "DSLHUB" },
         { pid: 'S', title: 'DSLWiki'}
     ];
 

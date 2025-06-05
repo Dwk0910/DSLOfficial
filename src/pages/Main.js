@@ -1,16 +1,24 @@
 import $ from 'jquery';
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+import sha256 from 'sha256';
 
 import shorticon_1 from '../docs/Main/shortcut_downloadcenter.png';
 import shorticon_2 from '../docs/Main/shortcut_applycenter.png';
 
-import { LocalStorage } from "../Util";
+import {getPermission, getUserInfo, LocalStorage} from "../Util";
 
 export default function Main() {
     document.title = "DSL OFFICIAL - HOME";
 
     const ls = LocalStorage();
+
+    const [userInf, setUserInf] = useState();
+
+    useEffect(() => {
+        getUserInfo().then((e) => { setUserInf(e); });
+    }, []);
 
     const [id, setId] = useState("");
     const [pwd, setPwd] = useState("");
@@ -25,15 +33,14 @@ export default function Main() {
                     type: "POST",
                     url: "https://neatorebackend.kro.kr/dslofficial/login",
                     contentType: "application/json; charset=utf-8",
-                    data: `{"id":"${id}", "pwd":"${pwd}"}`
+                    data: `{"id":"${id}", "pwd":"${sha256(pwd)}"}`
                 }).then((e) => {
                     if (JSON.parse(e).status === "true") {
                         ls.set('id', id);
-                        ls.set('pwd', pwd);
+                        ls.set('pwd', sha256(pwd));
                         window.location.reload();
                     } else alert("아이디 또는 비밀번호가 잘못되었습니다.");
                 });
-
                 event.preventDefault();
             }}>
                 <input name={"id"} type={"text"} placeholder={"아이디"} style={{ width: '200px', height: '25px', fontFamily: 'suite' }} onChange={(e) => { setId(e.target.value); }}/>
@@ -51,8 +58,8 @@ export default function Main() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '30px' }}>
                 <span style={{ fontFamily: 'suite', fontWeight: 'bold', fontSize: '1.2rem' }}>{ ls.get("id") }</span>
-                <span style={{ fontFamily: 'suite', fontSize: '0.9rem' }}>일반유저</span>
-                <span style={{ fontFamily: 'suite', fontSize: '0.9rem' }}>2025.06.04 가입</span>
+                <span style={{ fontFamily: 'suite', fontSize: '0.9rem' }}>{ userInf ? (<span>{ getPermission(userInf) }</span>) : (<span>로딩 중...</span>) }</span>
+                <span style={{ fontFamily: 'suite', fontSize: '0.9rem' }}>{ userInf ? (<span>{ userInf["date"] } 가입</span>) : (<span>로딩 중...</span>) }</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingRight: '30px' }}>
                 <input type={"button"} value={"내정보"} onClick={() => { alert("Coming soon!\n개발 중입니다.") }} style={{ marginRight: '10px', marginTop: '20px', padding: '10px', cursor: 'pointer', fontFamily: 'suite', fontWeight: 'bold' }}/>

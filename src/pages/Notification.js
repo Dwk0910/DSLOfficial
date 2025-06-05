@@ -1,13 +1,28 @@
 import * as React from 'react';
 import notification_banner from '../docs/banners/notification_banner.png';
 
-import { getURLString, LocalStorage } from "../Util";
-import { useState } from 'react';
+import { getURLString, getUserInfo, getPermission } from "../Util";
+
+import { useEffect, useState } from 'react';
 import MDEdit from '@uiw/react-md-editor';
 
 export default function Notification() {
     document.title = "DSL OFFICIAL - 공지";
-    const ls = LocalStorage();
+
+    const [userInf, setUserInf] = useState();
+    useEffect(() => {
+        getUserInfo().then((e) => { setUserInf(e) });
+    }, []);
+
+    const perm = getPermission(userInf);
+    useEffect(() => {
+        if (userInf !== undefined) {
+            if (perm !== "공지관리자" && getURLString("t") === "n") {
+                alert("Error 403 Forbidden : 당신은 이 페이지에 접근할 권한이 없습니다.");
+                window.location.assign(".?pid=1");
+            }
+        }
+    }, [perm, userInf]);
 
     let postComponentList = [];
     const postList = [
@@ -44,13 +59,10 @@ export default function Notification() {
 
     const target = getURLString("t");
      if (target === 'n') {
-         if (ls.get("id") === null) {
-             alert("Error 403 Forbidden : 당신은 이 페이지에 접근할 권한이 없습니다.");
-             window.location.assign(".?pid=1");
-         }
 
          document.title = "DSL OFFICIAL - 공지 [새로운 게시글 작성]";
          document.documentElement.setAttribute('data-color-mode', 'light');
+
          return (
              <div style={{ width: '100%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
                  <img src={notification_banner} alt={"banner"} style={{ width: '91%', marginTop: '20px' }}/>
@@ -119,9 +131,9 @@ export default function Notification() {
             i++;
         });
 
-        const addbtn = (ls.get("id") !== null) ? (
+        const addbtn = (userInf ? getPermission(userInf) === "공지관리자" : false) ? (
             <div style={{ width: '97.33%', marginTop: '15px', marginBottom: '15px', display: 'flex', justifyContent: 'left' }}>
-                <input type={"button"} value={"게시글 추가"} style={{ fontSize: '1.03rem', fontFamily: 'suite', padding: '10px', cursor: 'pointer' }} onClick={() => {window.location.assign(".?pid=1&t=n")}}/>
+                <input type={"button"} value={"게시글 추가"} style={{ fontSize: '1.03rem', fontFamily: 'suite', padding: '10px', cursor: 'pointer' }} onClick={() => { window.location.assign(".?pid=1&t=n") }}/>
             </div>
         ) : (<div></div>);
 
