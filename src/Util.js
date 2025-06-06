@@ -21,7 +21,10 @@ export const getUserInfo = () =>
         type: "POST",
         url: "https://neatorebackend.kro.kr/dslofficial/login",
         contentType: "application/json; charset=utf-8",
-        data: `{"id":"${ls.get("id")}", "pwd":"${ls.get("pwd")}"}`
+        data: JSON.stringify({
+            id: ls.get("id"),
+            pwd: ls.get("pwd")
+        })
     }).then(e => ({
         id: ls.get("id"),
         date: JSON.parse(e)["registerDate"],

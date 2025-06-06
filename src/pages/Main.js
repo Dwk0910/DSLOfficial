@@ -33,7 +33,10 @@ export default function Main() {
                     type: "POST",
                     url: "https://neatorebackend.kro.kr/dslofficial/login",
                     contentType: "application/json; charset=utf-8",
-                    data: `{"id":"${id}", "pwd":"${sha256(pwd)}"}`
+                    data: JSON.stringify({
+                        id: id,
+                        pwd: pwd
+                    })
                 }).then((e) => {
                     if (JSON.parse(e).status === "true") {
                         ls.set('id', id);

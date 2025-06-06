@@ -39,7 +39,11 @@ function App() {
         case '0': page = <Main/>; break;
         case '1': page = <Notification/>; break;
         case '5': page = <DDM/>; break;
-        case 'S': window.location.assign('https://dslwiki.kro.kr'); break;
+        case 'S': {
+            page = (<span>리디렉션 중...</span>);
+            window.location.assign("https://dslwiki.kro.kr");
+            break;
+        }
         case 'er404': page = <Error404/>; break;
         default: page = <Error404/>; break;
     }
