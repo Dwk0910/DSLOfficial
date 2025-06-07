@@ -16,6 +16,40 @@ class LocalStorageClass {
 
 const ls = LocalStorage();
 
+function encodeToBase64(str) {
+    const utf8Bytes = new TextEncoder().encode(str);
+    const binaryString = Array.from(utf8Bytes)
+        .map(byte => String.fromCharCode(byte))
+        .join('');
+    return btoa(binaryString);
+}
+
+function decodeFromBase64(base64) {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return new TextDecoder().decode(bytes);
+}
+
+export function encodeUrlSafeBase64(str) {
+    return encodeToBase64(str)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+}
+
+export function decodeUrlSafeBase64(base64) {
+    let padded = base64
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    while (padded.length % 4 !== 0) {
+        padded += '=';
+    }
+    return decodeFromBase64(padded);
+}
+
 export const getUserInfo = () =>
     $.ajax({
         type: "POST",
@@ -25,15 +59,26 @@ export const getUserInfo = () =>
             id: ls.get("id"),
             pwd: ls.get("pwd")
         })
-    }).then(e => ({
-        id: ls.get("id"),
-        date: JSON.parse(e)["registerDate"],
-        perm: JSON.parse(e)["permission"]
-    }));
+    }).then(e => {
+        if (JSON.parse(e)["status"] === "true") {
+            return ({
+                id: ls.get("id"),
+                date: JSON.parse(e)["registerDate"],
+                perm: JSON.parse(e)["permission"]
+            });
+        } else {
+            return ({
+                id: "userstatus_unlogined",
+                date: "0000-00-00",
+                perm: '0'
+            });
+        }
+    });
 
 export function getPermission(userInf) {
     if (userInf !== undefined) {
         switch (userInf["perm"]) {
+            case "0" : return "unauthorized";
             case "1" : return "일반유저";
             case "2" : return "공지관리자";
             default :

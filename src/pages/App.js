@@ -12,16 +12,27 @@ import Main from '../pages/Main';
 import Notification from '../pages/Notification';
 import DDM from '../pages/DDM.js';
 
+import { Lock, ShieldOff } from 'lucide-react';
+import { useEffect, useState } from "react";
+
 function App() {
     if (window.location.search.includes("pid=0")) window.location.assign('.');
 
     // 미리 등록된 LocalStorage에 대해 Validation
     const ls = LocalStorage();
-    if (getUserInfo() === null) {
-        // 잘못된 값이 있는 것이므로 제거
-        ls.remove("id");
-        ls.remove("pwd");
-    }
+    const [userInf, setUserInf] = useState();
+
+    useEffect(() => {
+        getUserInfo().then((e) => { setUserInf(e); });
+    }, []);
+
+    if (userInf) {
+        if (userInf["id"] === "userstatus_unlogined") {
+            // 잘못된 값이 있는 것이므로 제거
+            ls.remove("id");
+            ls.remove("pwd");
+        }
+    } else return;
 
     const bannerMap = {
         img: banner_1,
@@ -44,6 +55,93 @@ function App() {
             window.location.assign("https://dslwiki.kro.kr");
             break;
         }
+        case 'er401': {
+            page = (
+                <div style={{
+                    height: '500px',
+                    width: '100%',
+                    backgroundColor: '#fffdfc',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    marginTop: '15%',
+                    alignItems: 'center',
+                    fontFamily: 'suite',
+                    color: '#333',
+                    textAlign: 'center',
+                    padding: '0 20px',
+                }}>
+                    <Lock size={64} color="#ff4d4f" strokeWidth={1.5} style={{ marginBottom: '20px' }} />
+                    <h1 style={{fontSize: '2rem', marginBottom: '10px'}}>401 Unauthorized</h1>
+                    <p style={{fontSize: '1.1rem', maxWidth: '400px'}}>
+                        이 페이지에 접근할 권한이 없습니다.<br/>
+                        먼저 로그인하거나 권한을 확인해 주세요.
+                    </p>
+                    <a href="/" style={{
+                        marginTop: '30px',
+                        fontSize: '1rem',
+                        color: '#007bff',
+                        textDecoration: 'none',
+                        border: '1px solid #007bff',
+                        borderRadius: '8px',
+                        padding: '10px 20px',
+                        transition: 'all 0.2s',
+                    }}
+                       onMouseOver={(e) => {
+                           e.currentTarget.style.backgroundColor = '#007bff';
+                           e.currentTarget.style.color = "white";
+                       }}
+                       onMouseOut={(e) => {
+                           e.currentTarget.style.backgroundColor = 'transparent';
+                           e.currentTarget.style.color = "#007bff";
+                       }}>
+                        홈으로 돌아가기 →
+                    </a>
+                </div>
+            );
+            break;
+        }
+        case 'er403': page = (
+            <div style={{
+                height: '500px',
+                width: '100%',
+                backgroundColor: '#fffdfc',
+                display: 'flex',
+                flexDirection: 'column',
+                marginTop: '15%',
+                alignItems: 'center',
+                fontFamily: 'suite',
+                color: '#333',
+                textAlign: 'center',
+                padding: '0 20px',
+            }}>
+                <ShieldOff size={64} color="#ff4d4f" strokeWidth={1.5} style={{ marginBottom: '20px' }} />
+                <h1 style={{fontSize: '2rem', marginBottom: '10px'}}>403 Forbidden</h1>
+                <p style={{fontSize: '1.1rem', maxWidth: '400px'}}>
+                    이 페이지를 보실 권한이 없습니다.<br/>
+                    정상적인 방법으로 접근해주세요.
+                </p>
+                <a href="/" style={{
+                    marginTop: '30px',
+                    fontSize: '1rem',
+                    color: '#007bff',
+                    textDecoration: 'none',
+                    border: '1px solid #007bff',
+                    borderRadius: '8px',
+                    padding: '10px 20px',
+                    transition: 'all 0.2s',
+                }}
+                   onMouseOver={(e) => {
+                       e.currentTarget.style.backgroundColor = '#007bff';
+                       e.currentTarget.style.color = "white";
+                   }}
+                   onMouseOut={(e) => {
+                       e.currentTarget.style.backgroundColor = 'transparent';
+                       e.currentTarget.style.color = "#007bff";
+                   }}>
+                    홈으로 돌아가기 →
+                </a>
+            </div>
+        ); break;
         case 'er404': page = <Error404/>; break;
         default: page = <Error404/>; break;
     }

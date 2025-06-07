@@ -7,23 +7,83 @@ import sha256 from 'sha256';
 import shorticon_1 from '../docs/Main/shortcut_downloadcenter.png';
 import shorticon_2 from '../docs/Main/shortcut_applycenter.png';
 
-import {getPermission, getUserInfo, LocalStorage} from "../Util";
+import {getPermission, getUserInfo, LocalStorage,} from "../Util";
 
 export default function Main() {
     document.title = "DSL OFFICIAL - HOME";
 
-    const ls = LocalStorage();
+    console.log()
 
+    const ls = LocalStorage();
     const [userInf, setUserInf] = useState();
+
+    const [postList, setPostList] = useState([]);
+    const [loading_post, setLoading_post] = useState(true);
 
     useEffect(() => {
         getUserInfo().then((e) => { setUserInf(e); });
     }, []);
 
+    useEffect(() => {
+        $.ajax({
+            url: "https://neatorebackend.kro.kr/dslofficial/getPostList",
+            type: "GET"
+        }).then((response) => {
+            setPostList(JSON.parse(response).reverse());
+            setLoading_post(false);
+        })
+    }, []);
+
     const [id, setId] = useState("");
     const [pwd, setPwd] = useState("");
 
-    const loginComponent = (ls.get('id') === null && ls.get("pwd") === null) ? (
+    if (!userInf || loading_post) {
+        return (
+            <div style={{
+                width: '100%',
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                paddingTop: '250px',
+                alignItems: 'center',
+                backgroundColor: '#ffffff',
+                fontFamily: 'suite',
+            }}>
+                <div className="spinner" style={{
+                    width: '60px',
+                    height: '60px',
+                    border: '6px solid #ddd',
+                    borderTop: '6px solid #007bff',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    marginBottom: '20px'
+                }}></div>
+                <span style={{
+                    fontsize: '1.4rem',
+                    color: '#333',
+                    fontWeight: 'bold'
+                }}>
+        로딩 중입니다...
+                </span>
+                <style>
+                    {`
+                      @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                      }
+                    `}
+                </style>
+            </div>
+        );
+    }
+
+    const notificationContent = (postList.length === 0) ? "공지가 없습니다." : (
+        postList.map((post) => {
+            return (<span key={post.t}>{post.t}</span>)
+        })
+    );
+
+    const loginComponent = (userInf["id"] === "userstatus_unlogined") ? (
         <React.Fragment>
             <div style={{ width: '300px', textAlign: 'center', marginBottom: '10px' }}>
                 <span style={{ fontFamily: 'suite', fontWeight: 'bold' }}>로그인 · LOG IN</span>
@@ -35,7 +95,7 @@ export default function Main() {
                     contentType: "application/json; charset=utf-8",
                     data: JSON.stringify({
                         id: id,
-                        pwd: pwd
+                        pwd: sha256(pwd)
                     })
                 }).then((e) => {
                     if (JSON.parse(e).status === "true") {
@@ -84,7 +144,9 @@ export default function Main() {
                 </div>
                 <div className={"Notification Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                     <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 공지사항</span>
-                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '15px', color: 'gray' }}>공지사항이 없습니다.</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <span style={{ fontFamily: 'suite', marginLeft: '15px', color: 'gray', marginTop: '50px' }}>{notificationContent}</span>
+                    </div>
                 </div>
             </div>
             <div className={"두번째"} style={{ display: 'flex', flexDirection: 'row' }}>
@@ -97,9 +159,8 @@ export default function Main() {
                         window.location.assign('.?pid=3');
                     }}/>
                 </div>
-                <div className={"Notification Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 인기글</span>
-                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '15px', color: 'gray' }}>인기글이 없습니다.</span>
+                <div className={"뭐넣지"} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    여기다 뭘 넣으면 좋을까.. GPT에게 물어보자
                 </div>
             </div>
             <div className={"세번째"} style={{ display: 'flex', flexDirection: 'row' }}>
