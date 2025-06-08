@@ -80,7 +80,9 @@ export function getPermission(userInf) {
         switch (userInf["perm"]) {
             case "0" : return "unauthorized";
             case "1" : return "일반유저";
-            case "2" : return "공지관리자";
+            case "2" : return "매니저";
+            case "3" : return "관리자";
+            case "4" : return "총관리자";
             default :
                 return "알 수 없음"
         }

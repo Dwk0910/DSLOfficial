@@ -7,7 +7,7 @@ import sha256 from 'sha256';
 import shorticon_1 from '../docs/Main/shortcut_downloadcenter.png';
 import shorticon_2 from '../docs/Main/shortcut_applycenter.png';
 
-import {getPermission, getUserInfo, LocalStorage,} from "../Util";
+import { getPermission, getUserInfo, LocalStorage } from "../Util";
 
 export default function Main() {
     document.title = "DSL OFFICIAL - HOME";
@@ -19,6 +19,38 @@ export default function Main() {
 
     const [postList, setPostList] = useState([]);
     const [loading_post, setLoading_post] = useState(true);
+
+    // check server status
+    const [wikiServerStatus, setWikiServerStatus] = useState("🟡 확인 중...");
+    const [dcsServerStatus, setDCSServerStatus] = useState("🟡 확인 중...");
+
+    // DCS Check
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetch("https://api.mcstatus.io/v2/status/java/mcserver.dslofficial.kro.kr")
+                .then(res => res.json())
+                .then(data => {
+                    if (data["online"]) setDCSServerStatus("🟢 온라인");
+                    else setDCSServerStatus("🔴 오프라인");
+                });
+        }, 10000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Wiki Check
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const img = new Image();
+            img.src = "https://dslwiki.kro.kr/resources/assets/poweredby_mediawiki.svg?nocache=" + Date.now();
+            img.onload = () => {
+                setWikiServerStatus("🟢 온라인")
+            };
+            img.onerror = () => {
+                setWikiServerStatus("🔴 오프라인");
+            };
+        });
+        return () => clearInterval(interval);
+    });
 
     useEffect(() => {
         getUserInfo().then((e) => { setUserInf(e); });
@@ -77,11 +109,25 @@ export default function Main() {
         );
     }
 
-    const notificationContent = (postList.length === 0) ? "공지가 없습니다." : (
-        postList.map((post) => {
-            return (<span key={post.t}>{post.t}</span>)
-        })
-    );
+    let i = 1;
+    let notificationContent = [];
+    if (postList.length === 0) notificationContent.push(<span style={{ fontFamily: 'suite', marginLeft: '15px', color: 'gray', marginTop: '50px' }}>공지가 없습니다.</span>)
+    else {
+        postList.forEach((post) => {
+            if (i <= 3) {
+                i++;
+                notificationContent.push(
+                    <div key={post.t} className={"posthoverstyle"} style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '10px', border: '1px solid gray', borderRadius: '5px', paddingTop: '10px', paddingBottom: '10px', cursor: 'pointer', transition: '.15s ease-in-out' }} onClick={() => {
+                        window.location.assign(".?pid=1&t=" + post.t)
+                    }}>
+                        <span style={{ fontFamily: 'suite', marginLeft: '20px' }}>{ post["author"] }</span>
+                        <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px', width: '315px' }}>{ post["name"] }</span>
+                        <span style={{ fontFamily: 'suite', marginLeft: '20px', marginRight: '20px' }}>{ post["date"].replaceAll("-", ".") }</span>
+                    </div>
+                );
+            }
+        });
+    }
 
     const loginComponent = (userInf["id"] === "userstatus_unlogined") ? (
         <React.Fragment>
@@ -137,33 +183,18 @@ export default function Main() {
     );
 
     return (
-        <div style={{ width: '91%', marginTop: '20px', display: 'flex', flexDirection: 'column' }}>
-            <div className={"첫번째"} style={{ display: 'flex', flexDirection: 'row' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
+            <div className={"menuSection"} style={{ marginTop: '20px' }}>
                 <div className={"로그인Area"} style={{ border: '1px solid gray', width: '300px', padding: '10px' }}>
                     { loginComponent }
                 </div>
-                <div className={"Notification Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 공지사항</span>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <span style={{ fontFamily: 'suite', marginLeft: '15px', color: 'gray', marginTop: '50px' }}>{notificationContent}</span>
-                    </div>
-                </div>
-            </div>
-            <div className={"두번째"} style={{ display: 'flex', flexDirection: 'row' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', width: '320px', textAlign: 'center', border: '1px solid gray', paddingTop: '10px', marginTop: '10px' }}>
-                    <span style={{ fontFamily: 'suite', fontWeight: 'bold' }}>바로가기</span>
-                    <img src={shorticon_1} alt={"downloadcenter"} style={{ width: '320px', marginTop: '10px', cursor: 'pointer' }} onClick={() => {
-                        window.location.assign('.?pid=4');
-                    }}/>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '320px', textAlign: 'center', border: '1px solid gray', paddingTop: '10px', marginTop: '10px' }}> <span style={{ fontFamily: 'suite', fontWeight: 'bold' }}>바로가기</span> <img src={shorticon_1} alt={"downloadcenter"} style={{ width: '320px', marginTop: '10px', cursor: 'pointer' }} onClick={() => {
+                    window.location.assign('.?pid=4');
+                }}/>
                     <img src={shorticon_2} alt={"applycenter"} style={{ width: '320px', marginTop: '5px', cursor: 'pointer' }} onClick={() => {
                         window.location.assign('.?pid=3');
                     }}/>
                 </div>
-                <div className={"뭐넣지"} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                    여기다 뭘 넣으면 좋을까.. GPT에게 물어보자
-                </div>
-            </div>
-            <div className={"세번째"} style={{ display: 'flex', flexDirection: 'row' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', width: '320px', textAlign: 'center', border: '1px solid gray', paddingTop: '10px', marginTop: '10px', paddingBottom: '10px' }}>
                     <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginBottom: '10px' }}>Credits</span>
                     <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '15px', textAlign: 'left' }}>
@@ -171,6 +202,32 @@ export default function Main() {
                         <span style={{ fontFamily: 'suite' }}><span style={{ fontWeight: 'bold' }}>* Backend  :</span> JDK17 Springboot</span>
                         <span style={{ fontFamily: 'suite' }}><span style={{ fontWeight: 'bold' }}>* Hosting  :</span> <a href={"https://vercel.com"}>VERCEL</a> webhosting</span>
                         <span style={{ fontFamily: 'suite' }}><span style={{ fontWeight: 'bold' }}>* Tested  :</span> Chromium Opensource</span>
+                    </div>
+                </div>
+            </div>
+            <div className={"contentSection"} style={{ marginLeft: '30px' }}>
+                <div className={"Notification Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '20px' }}>
+                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 공지사항</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: '22px', minHeight: "160px" }}>
+                        {notificationContent}
+                    </div>
+                </div>
+                <div className={"Server-Status Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '35px', height: '250px' }}>
+                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 여기에 뭐넣을지 추천좀</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', marginTop: '10px', marginLeft: '20px', fontFamily: 'suite' }}>
+                    <span style={{ fontFamily: 'suite', fontWeight: 'bold' }}>· 서버운영현황</span>
+                    <div style={{ display: 'flex' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginTop: '8px', border: '1px solid gray', padding: '5%', minWidth: '200px', borderRadius: '5px' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>DSL CITY SERVER</span>
+                            <span style={{ fontSize: '0.9rem' }} className={"hoverstyle"} onClick={() => { navigator.clipboard.writeText("mcserver.dslofficial.kro.kr").then(() => { alert("클립보드에 복사되었습니다."); }); }}>mcserver.dslofficial.kro.kr</span>
+                            <span style={{ fontSize: '0.9rem', marginTop: '20px' }}>{ dcsServerStatus }</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', marginTop: '8px', marginLeft: '15px', border: '1px solid gray', padding: '5%', minWidth: '200px', borderRadius: '5px' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>DSLWiki</span>
+                            <span style={{ fontSize: '0.9rem' }} className={"hoverstyle"} onClick={() => { window.open("https://www.dslwiki.kro.kr/"); }}>https://www.dslwiki.kro.kr</span>
+                            <span style={{ fontSize: '0.9rem', marginTop: '20px' }}>{ wikiServerStatus }</span>
+                        </div>
                     </div>
                 </div>
             </div>

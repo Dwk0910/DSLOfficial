@@ -1,19 +1,22 @@
 import * as React from 'react';
+import { useEffect, useLayoutEffect, useState } from "react";
+
+import { Lock, ShieldOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
 import { getURLString, getUserInfo, LocalStorage } from "../Util";
 
 import Topmenu from '../component/Topmenu';
 
 import img_title from '../docs/title.png';
 import banner_1 from '../docs/banners/banner_1.png';
+import banner_2 from '../docs/banners/banner_2.png';
 
 // page import
 import Error404 from '../pages/Error404';
 import Main from '../pages/Main';
 import Notification from '../pages/Notification';
 import DDM from '../pages/DDM.js';
-
-import { Lock, ShieldOff } from 'lucide-react';
-import { useEffect, useState } from "react";
 
 function App() {
     if (window.location.search.includes("pid=0")) window.location.assign('.');
@@ -22,6 +25,39 @@ function App() {
     const ls = LocalStorage();
     const [userInf, setUserInf] = useState();
 
+    // 배너 정보, 자동 배너 변경을 위한 useState
+    const bannerSourceList = [
+        banner_1,
+        banner_2,
+    ];
+
+    const bannerLinkList = [
+        ".?pid=1&t=1",
+        "https://discord.gg/wBu7McQZcS"
+    ];
+
+    const [currentBanner, setCurrentBanner] = useState(0);
+    const scrollY = window.scrollY;
+    // 렌더 후 강제로 원래 위치로 복귀
+    useLayoutEffect(() => {
+        window.scrollTo(0, scrollY);
+    }, [currentBanner, scrollY]);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setCurrentBanner(prev => (prev + 1) % bannerSourceList.length);
+        }, 10000); // 10초마다 변경
+
+        return () => clearInterval(intervalId); // 컴포넌트 언마운트 시 인터벌 정리
+    }, [bannerSourceList.length]);
+
+    // edit_name과 name_content는 ?et가 없을 땐 지워저야 함.
+    if (getURLString("et") === "0" && (ls.get("edit_name") !== null || ls.get("edit_content") !== null)) {
+        ls.remove("edit_name");
+        ls.remove("edit_content");
+    }
+
+    // get userinfo (Promise) - 이 아래로는 useXXX() 사용불가
     useEffect(() => {
         getUserInfo().then((e) => { setUserInf(e); });
     }, []);
@@ -33,17 +69,6 @@ function App() {
             ls.remove("pwd");
         }
     } else return;
-
-    const bannerMap = {
-        img: banner_1,
-        link: '.?pid=1&t=1'
-    };
-
-    let banner = (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', marginBottom: '20px' }}>
-            <img src={bannerMap.img} alt={"banner"} width={"90.9%"} onClick={() => window.location.assign(bannerMap.link)} style={{ cursor: 'pointer' }}/>
-        </div>
-    );
 
     let page;
     switch (getURLString('pid')) {
@@ -154,7 +179,30 @@ function App() {
               <span style={{ borderTop: '1px solid gray', display: 'flex', width: '100%' }}></span>
           </div>
           <div style={{ paddingTop: '80px' }}></div>
-          {banner}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minHeight: '190px' }}>
+              <AnimatePresence mode={"wait"}>
+                  <motion.div
+                      key={currentBanner}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 1 }}
+                      style={{ width: '90.9%' }}
+                  >
+                      <img
+                          src={bannerSourceList[currentBanner]}
+                          alt="banner"
+                          width="100%"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => window.open(bannerLinkList[currentBanner])}
+                      />
+                  </motion.div>
+              </AnimatePresence>
+              <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', width: '90.9%', marginTop: '2px', marginRight: '15px' }}>
+                  <span className={"hoverstyle"} style={{ marginRight: '20px', fontFamily: 'suite' }} onClick={() => { setCurrentBanner((currentBanner <= 0) ? bannerSourceList.length - 1 : currentBanner - 1) }}>{"<"}</span>
+                  <span className={"hoverstyle"} style={{ fontFamily: 'suite' }} onClick={() => { setCurrentBanner((currentBanner >= bannerSourceList.length - 1) ? 0 : currentBanner + 1)}}>{">"}</span>
+              </div>
+          </div>
           <Topmenu/>
           <div style={{ width: '100%', minHeight: '70vh', display: 'flex', justifyContent: 'center' }}>
               {page}

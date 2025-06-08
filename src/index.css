@@ -18,3 +18,7 @@ body {
     text-decoration: underline;
     cursor: pointer;
 }
+
+.posthoverstyle:hover {
+    transform: scale(1.03);
+}

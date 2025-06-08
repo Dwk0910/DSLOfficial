@@ -37,7 +37,7 @@ export default function Notification() {
     const perm = React.useMemo(() => getPermission(userInf), [userInf]);
     useEffect(() => {
         if (userInf !== undefined) {
-            if (perm !== "공지관리자" && getURLString("t") === "n") {
+            if (!perm.includes("관리자") && getURLString("t") === "n") {
                 window.location.assign(".?pid=er403");
                 return (<span></span>);
             }
@@ -53,45 +53,45 @@ export default function Notification() {
 
     if (getURLString("name"))
 
-    if (loading_user || loading_post) {
-        return (
-            <div style={{
-                width: '100%',
-                height: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                paddingTop: '250px',
-                alignItems: 'center',
-                backgroundColor: '#ffffff',
-                fontFamily: 'suite',
-            }}>
-                <div className="spinner" style={{
-                    width: '60px',
-                    height: '60px',
-                    border: '6px solid #ddd',
-                    borderTop: '6px solid #007bff',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                    marginBottom: '20px'
-                }}></div>
-                <span style={{
-                    fontsize: '1.4rem',
-                    color: '#333',
-                    fontWeight: 'bold'
+        if (loading_user || loading_post) {
+            return (
+                <div style={{
+                    width: '100%',
+                    height: '100vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    paddingTop: '250px',
+                    alignItems: 'center',
+                    backgroundColor: '#ffffff',
+                    fontFamily: 'suite',
                 }}>
+                    <div className="spinner" style={{
+                        width: '60px',
+                        height: '60px',
+                        border: '6px solid #ddd',
+                        borderTop: '6px solid #007bff',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        marginBottom: '20px'
+                    }}></div>
+                    <span style={{
+                        fontsize: '1.4rem',
+                        color: '#333',
+                        fontWeight: 'bold'
+                    }}>
         로딩 중입니다...
                 </span>
-                <style>
-                    {`
+                    <style>
+                        {`
                       @keyframes spin {
                         0% { transform: rotate(0deg); }
                         100% { transform: rotate(360deg); }
                       }
                     `}
-                </style>
-            </div>
-        );
-    }
+                    </style>
+                </div>
+            );
+        }
 
     // AFTER LOADING (RENDER)
     let content;
@@ -110,6 +110,9 @@ export default function Notification() {
     if (getURLString("editmode") !== "0") {
         if (getPermission(userInf) === "unauthorized") {
             window.location.assign(".?pid=er401")
+            return;
+        } else if (targetPost["author"] === userInf["id"]) {
+            window.location.assign(".?pid=er403");
             return;
         }
 
@@ -218,7 +221,9 @@ export default function Notification() {
                     }} style={{marginBottom: '15px'}}>
                         <div style={{display: 'flex', justifyContent: 'left', width: '100%', marginTop: '35px'}}>
                             <span className={"hoverstyle"} style={{marginBottom: '5px', fontFamily: 'suite'}}
-                                  onClick={() => { back(); }}>{"← 돌아가기"}</span>
+                                  onClick={() => {
+                                      back();
+                                  }}>{"← 돌아가기"}</span>
                         </div>
                         <input type={"text"} style={{
                             fontFamily: 'suite',
@@ -244,7 +249,9 @@ export default function Notification() {
                             fontSize: '1.1rem',
                             fontFamily: 'suite',
                             cursor: 'pointer'
-                        }} onClick={() => { back(); }}/>
+                        }} onClick={() => {
+                            back();
+                        }}/>
                         <input type={"submit"} value={(editmode) ? "게시글 수정" : "게시글 업로드"} style={{
                             marginTop: '25px',
                             width: "150px",
@@ -323,7 +330,8 @@ export default function Notification() {
                     }}></span>
                     {
                         (targetContent["content"]) ? (
-                            <MDEdit.Markdown source={targetContent["content"]} style={{marginTop: '10px'}}/>
+                            <MDEdit.Markdown source={targetContent["content"]}
+                                             style={{marginTop: '10px', fontFamily: 'suite', fontSize: '1.1rem'}}/>
                         ) : (
                             <span>로딩 중입니다...</span>
                         )
@@ -421,7 +429,7 @@ export default function Notification() {
             });
         }
 
-        const addbtn = (userInf ? getPermission(userInf) === "공지관리자" : false) ? (
+        const addbtn = (userInf ? getPermission(userInf).includes("관리자") : false) ? (
             <div style={{
                 width: '97.33%',
                 marginTop: '15px',
@@ -476,8 +484,8 @@ export default function Notification() {
                 </div>
                 {
                     (postComponentList.length === 0) ? (
-                        <div style={{ marginTop: '50px' }}>
-                            <span style={{ fontFamily: 'suite', color: 'gray' }}>공지가 없습니다.</span>
+                        <div style={{marginTop: '50px'}}>
+                            <span style={{fontFamily: 'suite', color: 'gray'}}>공지가 없습니다.</span>
                         </div>
                     ) : postComponentList
                 }
