@@ -1,5 +1,36 @@
 import $ from 'jquery';
 
+export class SimpleExecutor {
+    constructor() {
+        this.tasks = [];
+        this.interval = null;
+    }
+
+    submit(task) {
+        this.tasks.push(task);
+        if (!this.interval) this.run();
+    }
+
+    run() {
+        this.interval = setInterval(() => {
+            if (this.tasks.length === 0) {
+                clearInterval(this.interval);
+                this.interval = null;
+                return;
+            }
+
+            const task = this.tasks.shift();
+            task(); // 비동기 함수면 task().then() 처리도 가능
+        }, 100); // 0.1초 간격으로 하나씩 처리
+    }
+
+    shutdown() {
+        clearInterval(this.interval);
+        this.interval = null;
+        this.tasks = [];
+    }
+}
+
 class LocalStorageClass {
     set(key, value) {
         localStorage.setItem("dslofficial_" + key, value);

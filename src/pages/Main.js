@@ -38,19 +38,26 @@ export default function Main() {
     }, []);
 
     // Wiki Check
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const img = new Image();
-            img.src = "https://dslwiki.kro.kr/resources/assets/poweredby_mediawiki.svg?nocache=" + Date.now();
-            img.onload = () => {
-                setWikiServerStatus("🟢 온라인")
-            };
-            img.onerror = () => {
+    function checkWikiServerStatus(){
+        fetch("https://dslwiki.kro.kr/ping-wiki.php", { cache: 'no-store' })
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(data => {
+                if (data.status === "online") setWikiServerStatus("🟢 온라인");
+                else setWikiServerStatus("🔴 오프라인");
+            })
+            .catch(() => {
                 setWikiServerStatus("🔴 오프라인");
-            };
-        });
-        return () => clearInterval(interval);
-    });
+                console.warn("위키서버 꺼져있음 : 위에 오류 내가 코딩못해서 나오는게 아니고 위키 서버가 꺼져있어서 나오는거니깐 이걸로 버그제보하지마삼");
+            });
+    }
+
+    // 초기 1회 실행
+    useEffect(() => {
+        checkWikiServerStatus();
+        setInterval(checkWikiServerStatus, 60000);
+    }, []);
+
+    // 60초마다 반복 실행
 
     useEffect(() => {
         getUserInfo().then((e) => { setUserInf(e); });
@@ -207,7 +214,7 @@ export default function Main() {
             </div>
             <div className={"contentSection"} style={{ marginLeft: '30px' }}>
                 <div className={"Notification Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '20px' }}>
-                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 공지사항</span>
+                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 최근 공지사항</span>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: '22px', minHeight: "160px" }}>
                         {notificationContent}
                     </div>

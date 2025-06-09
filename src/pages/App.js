@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 
 import { Lock, ShieldOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,14 +9,17 @@ import { getURLString, getUserInfo, LocalStorage } from "../Util";
 import Topmenu from '../component/Topmenu';
 
 import img_title from '../docs/title.png';
-import banner_1 from '../docs/banners/banner_1.png';
-import banner_2 from '../docs/banners/banner_2.png';
 
 // page import
 import Error404 from '../pages/Error404';
 import Main from '../pages/Main';
 import Notification from '../pages/Notification';
+import ReqCentre from '../pages/ReqCentre';
+import Library from '../pages/Library';
 import DDM from '../pages/DDM.js';
+
+import banner_1 from '../docs/banners/banner_1.png';
+import banner_2 from '../docs/banners/banner_2.png';
 
 function App() {
     if (window.location.search.includes("pid=0")) window.location.assign('.');
@@ -26,10 +29,18 @@ function App() {
     const [userInf, setUserInf] = useState();
 
     // 배너 정보, 자동 배너 변경을 위한 useState
-    const bannerSourceList = [
+    const bannerSourceList = useMemo(() => [
         banner_1,
-        banner_2,
-    ];
+        banner_2
+    ], []);
+
+    useEffect(() => {
+        bannerSourceList.forEach(src => {
+            const img = new Image();
+            img.onload = () => {};
+            img.src = src;
+        });
+    }, [bannerSourceList]);
 
     const bannerLinkList = [
         ".?pid=1&t=1",
@@ -37,30 +48,27 @@ function App() {
     ];
 
     const [currentBanner, setCurrentBanner] = useState(0);
-    const scrollY = window.scrollY;
-    // 렌더 후 강제로 원래 위치로 복귀
-    useLayoutEffect(() => {
-        window.scrollTo(0, scrollY);
-    }, [currentBanner, scrollY]);
 
+    const intervalId = useRef(null);
     useEffect(() => {
-        const intervalId = setInterval(() => {
+        if (intervalId.current) clearInterval(intervalId.current);
+        intervalId.current = setInterval(() => {
             setCurrentBanner(prev => (prev + 1) % bannerSourceList.length);
-        }, 10000); // 10초마다 변경
+        }, 8000); // 10초마다 변경
 
-        return () => clearInterval(intervalId); // 컴포넌트 언마운트 시 인터벌 정리
+        return () => clearInterval(intervalId.current); // 컴포넌트 언마운트 시 인터벌 정리
     }, [bannerSourceList.length]);
+
+    // get userinfo (Promise) - 이 아래로는 useXXX() 사용불가
+    useEffect(() => {
+        getUserInfo().then((e) => { setUserInf(e); });
+    }, []);
 
     // edit_name과 name_content는 ?et가 없을 땐 지워저야 함.
     if (getURLString("et") === "0" && (ls.get("edit_name") !== null || ls.get("edit_content") !== null)) {
         ls.remove("edit_name");
         ls.remove("edit_content");
     }
-
-    // get userinfo (Promise) - 이 아래로는 useXXX() 사용불가
-    useEffect(() => {
-        getUserInfo().then((e) => { setUserInf(e); });
-    }, []);
 
     if (userInf) {
         if (userInf["id"] === "userstatus_unlogined") {
@@ -74,6 +82,8 @@ function App() {
     switch (getURLString('pid')) {
         case '0': page = <Main/>; break;
         case '1': page = <Notification/>; break;
+        case '3': page = <ReqCentre/>; break;
+        case '4': page = <Library/>; break;
         case '5': page = <DDM/>; break;
         case 'S': {
             page = (<span>리디렉션 중...</span>);
@@ -178,8 +188,21 @@ function App() {
               }}/>
               <span style={{ borderTop: '1px solid gray', display: 'flex', width: '100%' }}></span>
           </div>
-          <div style={{ paddingTop: '80px' }}></div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minHeight: '190px' }}>
+          {/* 배너 레이아웃 공간 확보용 더미 */}
+          <div style={{ height: '10px', width: '100%' }}></div>
+
+          {/* 배너 이미지 자체는 흐름에서 제거 (absolute로 띄움) */}
+          <div style={{
+              position: 'absolute',
+              top: '80px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '1000px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              zIndex: '0',
+          }}>
               <AnimatePresence mode={"wait"}>
                   <motion.div
                       key={currentBanner}
@@ -193,16 +216,24 @@ function App() {
                           src={bannerSourceList[currentBanner]}
                           alt="banner"
                           width="100%"
+                          height="180px"
                           style={{ cursor: 'pointer' }}
                           onClick={() => window.open(bannerLinkList[currentBanner])}
                       />
                   </motion.div>
               </AnimatePresence>
               <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', width: '90.9%', marginTop: '2px', marginRight: '15px' }}>
-                  <span className={"hoverstyle"} style={{ marginRight: '20px', fontFamily: 'suite' }} onClick={() => { setCurrentBanner((currentBanner <= 0) ? bannerSourceList.length - 1 : currentBanner - 1) }}>{"<"}</span>
-                  <span className={"hoverstyle"} style={{ fontFamily: 'suite' }} onClick={() => { setCurrentBanner((currentBanner >= bannerSourceList.length - 1) ? 0 : currentBanner + 1)}}>{">"}</span>
+                  <span className={"hoverstyle"} style={{ marginRight: '20px', fontFamily: 'suite' }} onClick={() => {
+                      clearInterval(intervalId.current);
+                      setCurrentBanner((currentBanner <= 0) ? bannerSourceList.length - 1 : currentBanner - 1);
+                  }}>{"<"}</span>
+                  <span className={"hoverstyle"} style={{ fontFamily: 'suite' }} onClick={() => {
+                      clearInterval(intervalId.current);
+                      setCurrentBanner((currentBanner >= bannerSourceList.length - 1) ? 0 : currentBanner + 1);
+                  }}>{">"}</span>
               </div>
           </div>
+          <div style={{ paddingTop: '280px' }}></div>
           <Topmenu/>
           <div style={{ width: '100%', minHeight: '70vh', display: 'flex', justifyContent: 'center' }}>
               {page}
