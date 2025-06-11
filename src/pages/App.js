@@ -78,6 +78,8 @@ function App() {
         }
     } else return;
 
+    // TODO: 알림시스템 만들기
+
     let page;
     switch (getURLString('pid')) {
         case '0': page = <Main/>; break;

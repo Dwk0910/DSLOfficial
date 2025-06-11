@@ -124,7 +124,7 @@ export default function Main() {
             if (i <= 3) {
                 i++;
                 notificationContent.push(
-                    <div key={post.t} className={"posthoverstyle"} style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '10px', border: '1px solid gray', borderRadius: '5px', paddingTop: '10px', paddingBottom: '10px', cursor: 'pointer', transition: '.15s ease-in-out' }} onClick={() => {
+                    <div key={post.t} className={"posthoverstyle"} style={{ width: '99%', display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '10px', border: '1px solid gray', borderRadius: '5px', paddingTop: '10px', paddingBottom: '10px', cursor: 'pointer', transition: '.15s ease-in-out' }} onClick={() => {
                         window.location.assign(".?pid=1&t=" + post.t)
                     }}>
                         <span style={{ fontFamily: 'suite', marginLeft: '20px' }}>{ post["author"] }</span>
@@ -190,7 +190,7 @@ export default function Main() {
     );
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', width: '90.9%'}}>
             <div className={"menuSection"} style={{ marginTop: '20px' }}>
                 <div className={"로그인Area"} style={{ border: '1px solid gray', width: '300px', padding: '10px' }}>
                     { loginComponent }
@@ -202,24 +202,33 @@ export default function Main() {
                         window.location.assign('.?pid=3');
                     }}/>
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '320px', textAlign: 'center', border: '1px solid gray', paddingTop: '10px', marginTop: '10px', paddingBottom: '10px', fontFamily: 'suite' }}>
+                    <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginBottom: '10px' }}>DSL의 기술개발에 지원해주세요!</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '15px', textAlign: 'left' }}>
+                        <span style={{ textDecoration: 'underline', fontWeight: 'bold' }}>[APP, MC] Java JDK 17 {"- 환영합니다"}</span>
+                        <span>[WEB] JS-REACT</span>
+                        <span>[OTHER] (Frontend) HTML, <span style={{ fontWeight: 'bold' }}>CSS</span></span>
+                        <span style={{ marginTop: '5px' }}>지금 바로 연락해주세요 : @neatore DM</span>
+                        <span style={{ color: 'gray', textDecoration: 'line-through', fontSize: '0.8rem' }}>1인개발 너무힘들어요</span>
+                    </div>
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', width: '320px', textAlign: 'center', border: '1px solid gray', paddingTop: '10px', marginTop: '10px', paddingBottom: '10px' }}>
                     <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginBottom: '10px' }}>Credits</span>
-                    <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '15px', textAlign: 'left' }}>
-                        <span style={{ fontFamily: 'suite' }}><span style={{ fontWeight: 'bold' }}>* Frontend :</span> HTML, CSS, JS & React</span>
-                        <span style={{ fontFamily: 'suite' }}><span style={{ fontWeight: 'bold' }}>* Backend  :</span> JDK17 Springboot</span>
-                        <span style={{ fontFamily: 'suite' }}><span style={{ fontWeight: 'bold' }}>* Hosting  :</span> <a href={"https://vercel.com"}>VERCEL</a> webhosting</span>
-                        <span style={{ fontFamily: 'suite' }}><span style={{ fontWeight: 'bold' }}>* Tested  :</span> Chromium Opensource</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+                        <span style={{ fontFamily: 'suite', textAlign: 'center', fontWeight: 'bold', color: 'black', textDecoration: 'underline' }}>DSL Website Project</span>
+                        <span style={{ textAlign: 'center' }}>2024. 3. 2. ~ </span>
+                        <span style={{ textAlign: 'center', color: 'gray' }}>{"- DSL OFFICIAL SERVER -"}</span>
                     </div>
                 </div>
             </div>
             <div className={"contentSection"} style={{ marginLeft: '30px' }}>
                 <div className={"Notification Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '20px' }}>
                     <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 최근 공지사항</span>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: '22px', minHeight: "160px" }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '22px', minHeight: "160px" }}>
                         {notificationContent}
                     </div>
                 </div>
-                <div className={"Server-Status Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '35px', height: '250px' }}>
+                <div className={"Server-Status Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '35px', height: '415px' }}>
                     <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 여기에 뭐넣을지 추천좀</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', marginTop: '10px', marginLeft: '20px', fontFamily: 'suite' }}>

@@ -19,6 +19,17 @@ body {
     cursor: pointer;
 }
 
+/* Main.js */
 .posthoverstyle:hover {
     transform: scale(1.03);
+}
+
+/* Library.js */
+.childhoverstyle {
+    transition: all .2s;
+    cursor: pointer;
+}
+
+.childhoverstyle:hover {
+    box-shadow: 5px 5px 15px #40a298;
 }
