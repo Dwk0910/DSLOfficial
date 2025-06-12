@@ -31,5 +31,14 @@ body {
 }
 
 .childhoverstyle:hover {
-    box-shadow: 5px 5px 15px #40a298;
+    box-shadow: 0 0 15px #002aff;
+}
+
+.menuhoverstyle {
+    transition: all .2s;
+    cursor: pointer;
+}
+
+.menuhoverstyle:hover {
+    background-color: #dedede;
 }

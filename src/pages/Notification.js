@@ -52,7 +52,6 @@ export default function Notification() {
     let targetPost = null;
 
     if (getURLString("name"))
-
         if (loading_user || loading_post) {
             return (
                 <div style={{
