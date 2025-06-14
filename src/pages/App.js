@@ -4,22 +4,26 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { Lock, ShieldOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { getURLString, getUserInfo, LocalStorage } from "../Util";
+import { getPermission, getURLString, getUserInfo, LocalStorage } from "../Util";
 
 import Topmenu from '../component/Topmenu';
 
 import img_title from '../docs/title.png';
 
 // page import
-import Error404 from '../pages/Error404';
 import Main from '../pages/Main';
 import Notification from '../pages/Notification';
+import Forum from '../pages/Forum';
 import ReqCentre from '../pages/ReqCentre';
 import Library from '../pages/Library';
 import DDM from '../pages/DDM.js';
 
 import banner_1 from '../docs/banners/banner_1.png';
 import banner_2 from '../docs/banners/banner_2.png';
+import banner_3 from '../docs/banners/banner_3.png';
+
+import error404 from "../docs/error404.gif";
+import Management from "./Management";
 
 function App() {
     if (window.location.search.includes("pid=0")) window.location.assign('.');
@@ -31,7 +35,8 @@ function App() {
     // 배너 정보, 자동 배너 변경을 위한 useState
     const bannerSourceList = useMemo(() => [
         banner_1,
-        banner_2
+        banner_2,
+        banner_3
     ], []);
 
     useEffect(() => {
@@ -44,7 +49,8 @@ function App() {
 
     const bannerLinkList = [
         ".?pid=1&t=1",
-        "https://discord.gg/wBu7McQZcS"
+        "https://discord.gg/wBu7McQZcS",
+        "http://dsl-seojeon.kro.kr/"
     ];
 
     const [currentBanner, setCurrentBanner] = useState(0);
@@ -54,7 +60,7 @@ function App() {
         if (intervalId.current) clearInterval(intervalId.current);
         intervalId.current = setInterval(() => {
             setCurrentBanner(prev => (prev + 1) % bannerSourceList.length);
-        }, 8000); // 10초마다 변경
+        }, 8000); // 8초마다 변경
 
         return () => clearInterval(intervalId.current); // 컴포넌트 언마운트 시 인터벌 정리
     }, [bannerSourceList.length]);
@@ -65,8 +71,8 @@ function App() {
     }, []);
 
     // edit_name과 name_content는 ?et가 없을 땐 지워저야 함.
-    if (getURLString("et") === "0" && (ls.get("edit_name") !== null || ls.get("edit_content") !== null)) {
-        ls.remove("edit_name");
+    if (getURLString("et") === "0" && (ls.get("edit_title") !== null || ls.get("edit_content") !== null)) {
+        ls.remove("edit_title");
         ls.remove("edit_content");
     }
 
@@ -84,14 +90,26 @@ function App() {
     switch (getURLString('pid')) {
         case '0': page = <Main/>; break;
         case '1': page = <Notification/>; break;
+        case '2': page = <Forum/>; break;
         case '3': page = <ReqCentre/>; break;
         case '4': page = <Library/>; break;
         case '5': page = <DDM/>; break;
+        case '6': {
+            alert("DCS 2시즌 1분기에 개발 시작 예정");
+            window.location.assign(".");
+            break;
+        }
         case 'S': {
             page = (<span>리디렉션 중...</span>);
             window.location.assign("https://dslwiki.kro.kr");
             break;
         }
+        case 'M': {
+            if (getPermission(userInf).includes("관리자")) page = <Management/>;
+            else window.location.assign(".?pid=er404");
+            break;
+        }
+
         case 'er401': {
             page = (
                 <div style={{
@@ -179,8 +197,17 @@ function App() {
                 </a>
             </div>
         ); break;
-        case 'er404': page = <Error404/>; break;
-        default: page = <Error404/>; break;
+        case 'er404': page = (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid gray', marginTop: '20px', marginBottom: '20px', width: '800px', height: '100%' }}>
+                <img src={error404} alt={"error404"} width={"500px"}/>
+                <span style={{ fontFamily: 'suite', fontWeight: 'bold', fontSize: '1.4rem', marginTop: '-20px' }}>페이지를 찾을 수 없습니다.</span>
+                <span style={{ fontFamily: 'suite', fontWeight: 'bold', fontSize: '0.95rem', textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
+                입력하신 주소의 페이지가 이동되었거나 삭제되어 찾을 수 없습니다.<br/>
+                주소가 올바른지 확인하신 후 다시 시도해 주세요.
+                </span>
+            </div>
+        ); break;
+        default: window.location.assign(".?pid=er404"); break;
     }
   return (
       <div style={{ width: '1000px', backgroundColor: 'white' }}>

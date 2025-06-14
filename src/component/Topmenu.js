@@ -1,17 +1,37 @@
 import * as React from 'react';
 import './Topmenu.css';
 
+import {getPermission, getUserInfo} from "../Util";
+
 export default function Topmenu() {
     const menuArray = [
         { pid: 0, title: "HOME" },
         { pid: 1, title: "공지" },
-        { pid: 2, title: "게시판" },
+        { pid: 2, title: "자유게시판" },
         { pid: 3, title: "신청센터" },
         { pid: 4, title: "자료실" },
         { pid: 5, title: "DDM" },
         { pid: 6, title: "DSLHUB" },
         { pid: 'S', title: 'DSLWiki'}
     ];
+
+    const [ userInf, setUserInf ] = React.useState(null);
+    React.useEffect(() => {
+        getUserInfo().then((e) => {
+            setUserInf(e);
+        })
+    }, []);
+
+    if (!userInf) {
+        return;
+    }
+
+    if (getPermission(userInf).includes("관리자")) {
+        menuArray.push({
+            pid: 'M',
+            title: '관리'
+        });
+    }
 
     return (
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center'}}>

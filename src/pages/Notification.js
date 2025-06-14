@@ -1,11 +1,22 @@
 import * as React from 'react';
 import $ from 'jquery';
 import MDEdit from '@uiw/react-md-editor';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 import notification_banner from '../docs/banners/notification_banner.png';
 
-import { getURLString, getUserInfo, getPermission, LocalStorage, encodeUrlSafeBase64, decodeUrlSafeBase64 } from "../Util";
+import {
+    getURLString,
+    getUserInfo,
+    getPermission,
+    LocalStorage,
+    encodeUrlSafeBase64,
+    decodeUrlSafeBase64,
+    getType
+} from "../Util";
+
+import Loading from '../component/Loading';
+
 
 export default function Notification() {
     document.title = "DSL OFFICIAL - 공지";
@@ -19,9 +30,19 @@ export default function Notification() {
     useEffect(() => {
         $.ajax({
             url: "https://neatorebackend.kro.kr/dslofficial/getPostList",
-            type: "GET"
+            type: "POST",
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({
+                CTPD: process.env.REACT_APP_CTPD
+            })
         }).then((response) => {
-            setPostList(JSON.parse(response).reverse());
+            const jsonResponse = JSON.parse(response);
+            const array = [];
+            for (let i = 0; i < jsonResponse.length; i++) {
+                if (jsonResponse[i]["type"] === "notification") array[i] = jsonResponse[i]; // 공지페이지 이므로 type이 notification인 것들만 가져옴
+            }
+
+            setPostList(array.reverse());
             setLoading_post(false);
         })
     }, []);
@@ -34,6 +55,26 @@ export default function Notification() {
         });
     }, []);
 
+    // for form
+    const ls = LocalStorage();
+    const [title, setTitle] = useState((ls.get("edit_name")) ? decodeUrlSafeBase64(ls.get("edit_name")) : "");
+    const [mdValue, setMdValue] = useState((ls.get("edit_content")) ? decodeUrlSafeBase64(ls.get("edit_content")) : "");
+
+    // Event Listener
+    const handleBeforeUnload = useCallback((e) => {
+        if (mdValue !== '' || title !== '') {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    }, [mdValue, title]);
+
+    useEffect(() => {
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [handleBeforeUnload]);
+
     const perm = React.useMemo(() => getPermission(userInf), [userInf]);
     useEffect(() => {
         if (userInf !== undefined) {
@@ -44,53 +85,13 @@ export default function Notification() {
         }
     }, [perm, userInf]);
 
-    // for form
-    const ls = LocalStorage();
-    const [title, setTitle] = useState((ls.get("edit_name")) ? decodeUrlSafeBase64(ls.get("edit_name")) : "");
-    const [mdValue, setMdValue] = useState((ls.get("edit_content")) ? decodeUrlSafeBase64(ls.get("edit_content")) : "");
-
     let targetPost = null;
 
     if (getURLString("name"))
         if (loading_user || loading_post) {
-            return (
-                <div style={{
-                    width: '100%',
-                    height: '100vh',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    paddingTop: '250px',
-                    alignItems: 'center',
-                    backgroundColor: '#ffffff',
-                    fontFamily: 'suite',
-                }}>
-                    <div className="spinner" style={{
-                        width: '60px',
-                        height: '60px',
-                        border: '6px solid #ddd',
-                        borderTop: '6px solid #007bff',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        marginBottom: '20px'
-                    }}></div>
-                    <span style={{
-                        fontsize: '1.4rem',
-                        color: '#333',
-                        fontWeight: 'bold'
-                    }}>
-        로딩 중입니다...
-                </span>
-                    <style>
-                        {`
-                      @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                      }
-                    `}
-                    </style>
-                </div>
-            );
+            return (<Loading/>);
         }
+
 
     // AFTER LOADING (RENDER)
     let content;
@@ -128,6 +129,7 @@ export default function Notification() {
                     url: "https://neatorebackend.kro.kr/dslofficial/deletePost",
                     contentType: "application/json; charset=utf-8",
                     data: JSON.stringify({
+                        CTPD: process.env.REACT_APP_CTPD,
                         t: getURLString("t")
                     })
                 }).then((response) => {
@@ -142,6 +144,7 @@ export default function Notification() {
                 return (<span>Redirecting...</span>);
             }
         }
+
     } else if (target === 'n') {
         let editmode = false;
         if (getURLString("et") !== "0") {
@@ -179,6 +182,7 @@ export default function Notification() {
                                     url: "https://neatorebackend.kro.kr/dslofficial/editPost",
                                     contentType: "application/json; charset=utf-8",
                                     data: JSON.stringify({
+                                        CTPD: process.env.REACT_APP_CTPD,
                                         t: getURLString("et"),
                                         name: title,
                                         content: mdValue
@@ -187,6 +191,8 @@ export default function Notification() {
                                     if (JSON.parse(response)["status"] === "true") {
                                         ls.remove("edit_name");
                                         ls.remove("edit_content");
+                                        window.removeEventListener('beforeunload', handleBeforeUnload);
+
                                         alert("수정이 완료되었습니다.");
                                         window.location.assign(".?pid=1");
                                     } else alert(response);
@@ -202,6 +208,7 @@ export default function Notification() {
                                     url: "https://neatorebackend.kro.kr/dslofficial/newPost",
                                     contentType: "application/json; charset=utf-8",
                                     data: JSON.stringify({
+                                        CTPD: process.env.REACT_APP_CTPD,
                                         type: "notification",
                                         name: title,
                                         author: userInf["id"],
@@ -211,6 +218,7 @@ export default function Notification() {
                                 }).then((response) => {
                                     if (JSON.parse(response)["status"] === "true") {
                                         alert("공지 등록이 완료되었습니다.");
+                                        window.removeEventListener('beforeunload', handleBeforeUnload);
                                         window.location.assign(".?pid=1");
                                     } else alert(response);
                                 });
@@ -410,7 +418,7 @@ export default function Notification() {
                                 width: '115px',
                                 marginLeft: '5px',
                                 fontWeight: 'bold'
-                            }}>{(e.type === "notification") ? "공지" : e.type}</span>
+                            }}>{getType(e.type)}</span>
                             <span key={e.title} style={{fontFamily: 'suite', width: '407px'}} className={"hoverstyle"}
                                   onClick={() => window.location.assign(".?pid=1&t=" + e.t)}>{e.name}</span>
                             <span key={e.author}

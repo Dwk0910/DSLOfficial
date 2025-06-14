@@ -19,9 +19,23 @@ body {
     cursor: pointer;
 }
 
-/* Main.js */
+/* Main.js, ReqCetnre.js */
+.posthoverstyle {
+    transition: all .2s ease-in-out;
+    cursor: pointer;
+}
+
 .posthoverstyle:hover {
     transform: scale(1.03);
+}
+
+/* Forum.js */
+.postmenuhoverstyle {
+    cursor: pointer;
+}
+
+.postmenuhoverstyle:hover {
+    border-bottom: 1px solid gray;
 }
 
 /* Library.js */

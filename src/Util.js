@@ -1,36 +1,5 @@
 import $ from 'jquery';
 
-export class SimpleExecutor {
-    constructor() {
-        this.tasks = [];
-        this.interval = null;
-    }
-
-    submit(task) {
-        this.tasks.push(task);
-        if (!this.interval) this.run();
-    }
-
-    run() {
-        this.interval = setInterval(() => {
-            if (this.tasks.length === 0) {
-                clearInterval(this.interval);
-                this.interval = null;
-                return;
-            }
-
-            const task = this.tasks.shift();
-            task(); // 비동기 함수면 task().then() 처리도 가능
-        }, 100); // 0.1초 간격으로 하나씩 처리
-    }
-
-    shutdown() {
-        clearInterval(this.interval);
-        this.interval = null;
-        this.tasks = [];
-    }
-}
-
 class LocalStorageClass {
     set(key, value) {
         localStorage.setItem("dslofficial_" + key, value);
@@ -87,6 +56,7 @@ export const getUserInfo = () =>
         url: "https://neatorebackend.kro.kr/dslofficial/login",
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify({
+            CTPD: process.env.REACT_APP_CTPD,
             id: ls.get("id"),
             pwd: ls.get("pwd")
         })
@@ -127,4 +97,24 @@ export function getURLString(key) {
 
 export function LocalStorage() {
     return new LocalStorageClass();
+}
+
+export const getType = (type, isHtoE) => {
+    if (isHtoE) {
+        switch (type) {
+            case "공지": return "notification";
+            case "자유": return "free";
+            case "질문": return "question";
+            case "TMI": return "TMI";
+            default: return "undefined";
+        }
+    } else {
+        switch (type) {
+            case "notification": return "공지";
+            case "free": return "자유";
+            case "question": return "질문";
+            case "TMI": return "TMI";
+            default: return "undefined";
+        }
+    }
 }

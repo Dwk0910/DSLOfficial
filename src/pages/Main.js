@@ -9,10 +9,10 @@ import shorticon_2 from '../docs/Main/shortcut_applycenter.png';
 
 import { getPermission, getUserInfo, LocalStorage } from "../Util";
 
+import Loading from '../component/Loading';
+
 export default function Main() {
     document.title = "DSL OFFICIAL - HOME";
-
-    console.log()
 
     const ls = LocalStorage();
     const [userInf, setUserInf] = useState();
@@ -66,9 +66,16 @@ export default function Main() {
     useEffect(() => {
         $.ajax({
             url: "https://neatorebackend.kro.kr/dslofficial/getPostList",
-            type: "GET"
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                CTPD: process.env.REACT_APP_CTPD
+            })
         }).then((response) => {
-            setPostList(JSON.parse(response).reverse());
+            const jsonResponse = JSON.parse(response);
+            const array = [];
+            for (let i = 0; i < jsonResponse.length; i++) if (jsonResponse[i]["type"] === "notification") array[i] = jsonResponse[i];
+            setPostList(array);
             setLoading_post(false);
         })
     }, []);
@@ -77,55 +84,19 @@ export default function Main() {
     const [pwd, setPwd] = useState("");
 
     if (!userInf || loading_post) {
-        return (
-            <div style={{
-                width: '100%',
-                height: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                paddingTop: '250px',
-                alignItems: 'center',
-                backgroundColor: '#ffffff',
-                fontFamily: 'suite',
-            }}>
-                <div className="spinner" style={{
-                    width: '60px',
-                    height: '60px',
-                    border: '6px solid #ddd',
-                    borderTop: '6px solid #007bff',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                    marginBottom: '20px'
-                }}></div>
-                <span style={{
-                    fontsize: '1.4rem',
-                    color: '#333',
-                    fontWeight: 'bold'
-                }}>
-        로딩 중입니다...
-                </span>
-                <style>
-                    {`
-                      @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                      }
-                    `}
-                </style>
-            </div>
-        );
+        return (<Loading/>);
     }
 
     let i = 1;
     let notificationContent = [];
-    if (postList.length === 0) notificationContent.push(<span style={{ fontFamily: 'suite', marginLeft: '15px', color: 'gray', marginTop: '50px' }}>공지가 없습니다.</span>)
+    if (postList.length === 0) notificationContent.push(<span key={0} style={{ fontFamily: 'suite', color: 'gray', marginTop: '50px', marginLeft: '-22px', width: '100%', textAlign: 'center' }}>공지가 없습니다.</span>)
     else {
         postList.forEach((post) => {
             if (i <= 3) {
                 i++;
                 notificationContent.push(
-                    <div key={post.t} className={"posthoverstyle"} style={{ width: '99%', display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '10px', border: '1px solid gray', borderRadius: '5px', paddingTop: '10px', paddingBottom: '10px', cursor: 'pointer', transition: '.15s ease-in-out' }} onClick={() => {
-                        window.location.assign(".?pid=1&t=" + post.t)
+                    <div key={post.t} className={"posthoverstyle"} style={{ width: '95.5%', display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: '10px', border: '1px solid gray', borderRadius: '5px', paddingTop: '10px', paddingBottom: '10px', cursor: 'pointer', transition: '.15s ease-in-out' }} onClick={() => {
+                        window.location.assign(".?pid=1&t=" + post.t);
                     }}>
                         <span style={{ fontFamily: 'suite', marginLeft: '20px' }}>{ post["author"] }</span>
                         <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px', width: '315px' }}>{ post["name"] }</span>
@@ -147,6 +118,7 @@ export default function Main() {
                     url: "https://neatorebackend.kro.kr/dslofficial/login",
                     contentType: "application/json; charset=utf-8",
                     data: JSON.stringify({
+                        CTPD: process.env.REACT_APP_CTPD,
                         id: id,
                         pwd: sha256(pwd)
                     })
@@ -155,7 +127,10 @@ export default function Main() {
                         ls.set('id', id);
                         ls.set('pwd', sha256(pwd));
                         window.location.reload();
-                    } else alert("아이디 또는 비밀번호가 잘못되었습니다.");
+                    } else {
+                        console.log(JSON.parse(e));
+                        alert("아이디 또는 비밀번호가 잘못되었습니다.");
+                    }
                 });
                 event.preventDefault();
             }}>
@@ -221,10 +196,10 @@ export default function Main() {
                     </div>
                 </div>
             </div>
-            <div className={"contentSection"} style={{ marginLeft: '30px' }}>
+            <div className={"contentSection"} style={{ marginLeft: '30px', width: '100%' }}>
                 <div className={"Notification Area"} style={{ display: 'flex', flexDirection: 'column', width: '100%', marginTop: '20px' }}>
                     <span style={{ fontFamily: 'suite', fontWeight: 'bold', marginLeft: '20px' }}>· 최근 공지사항</span>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '22px', minHeight: "160px" }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginLeft: '22px', minHeight: "160px", width: '100%' }}>
                         {notificationContent}
                     </div>
                 </div>
