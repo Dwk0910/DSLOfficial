@@ -54,7 +54,6 @@ export default function Forum() {
 
 
     // Event Listener
-
     const handleBeforeUnload = useCallback((e) => {
         if ((mdValue !== '' || title !== '') && window.location.search.includes("t=n")) {
             e.preventDefault();
@@ -136,7 +135,7 @@ export default function Forum() {
             if (getURLString("et") !== "0") {
                 const target = postList.find(item => item["t"] === getURLString("et"));
                 if (!target) {
-                    window.loation.assign(".?pid=er404");
+                    window.location.assign(".?pid=er404");
                     return;
                 }
 

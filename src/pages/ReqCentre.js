@@ -3,7 +3,7 @@ import $ from 'jquery';
 
 import MDEdit from '@uiw/react-md-editor';
 
-import { getURLString, getUserInfo } from '../Util';
+import { getURLString, getUserInfo, getType_Req } from '../Util';
 import reqcentre_banner from '../docs/banners/reqcentre_banner.png';
 
 import Loading from '../component/Loading';
@@ -11,28 +11,49 @@ import Loading from '../component/Loading';
 export default function ReqCentre() {
     document.title = "DSL OFFICIAL - 신청센터"
 
-    const [isLoading, setIsLoading] = React.useState(true);
     const [userInf, setUserInf] = React.useState();
-
     const [mdValue, setMdValue] = React.useState('');
-
-    const [reqList, setReqList] = React.useState([]);
+    const [reqList, setReqList] = React.useState();
 
     React.useEffect(() => {
         getUserInfo().then((e) => {
             setUserInf(e);
-            setIsLoading(false);
-        })
+        });
     }, []);
 
-    if (isLoading) return (<Loading/>);
+    React.useEffect(() => {
+        if (userInf) {
+            $.ajax({
+                type: "POST",
+                url: "https://neatorebackend.kro.kr/dslofficial/getRequestList",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    CTPD: process.env.REACT_APP_CTPD,
+                    name: userInf["id"]
+                })
+            }).then((response) => {
+                setReqList(JSON.parse(response).reverse());
+            });
+        }
+    }, [userInf]);
 
     // EventListener
-    window.addEventListener('beforeunload', (event) => {
-        if (mdValue !== '') {
-            event.preventDefault();
+    const handleBeforeUnload = React.useCallback((e) => {
+        if ((mdValue !== '') && window.location.search.includes("t=2")) {
+            e.preventDefault();
+            e.returnValue = '';
         }
-    })
+    }, [mdValue]);
+
+    React.useEffect(() => {
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [handleBeforeUnload]);
+
+
+    if (!userInf || !reqList) return (<Loading/>);
 
     // RENDER
 
@@ -114,6 +135,7 @@ export default function ReqCentre() {
                             }).then((response) => {
                                 if (JSON.parse(response)["status"] === "true") {
                                     alert("건의가 완료되었습니다.");
+                                    window.removeEventListener("beforeunload", handleBeforeUnload);
                                     window.location.assign(".?pid=3");
                                 } else console.log(response);
                             });
@@ -166,7 +188,7 @@ export default function ReqCentre() {
                             })
                         }).then((response) => {
                             if (JSON.parse(response)["status"] === "true") {
-                                alert("아이디 요청이 완료되었습니다.");
+                                alert("아이디 변경 요청이 완료되었습니다.");
                                 window.location.assign(".?pid=3");
                             } else console.log(response);
                         });
@@ -181,24 +203,13 @@ export default function ReqCentre() {
     } else if (target === "chk") {
         // 보낸 요청 보기
         document.documentElement.setAttribute('data-color-mode', 'light');
-        $.ajax({
-            type: "POST",
-            url: "https://neatorebackend.kro.kr/dslofficial/getRequestList",
-            contentType: "application/json; charset=UTF-8",
-            data: JSON.stringify({
-                CTPD: process.env.REACT_APP_CTPD,
-                name: userInf["id"]
-            })
-        }).then((response) => {
-            setReqList(JSON.parse(response).reverse());
-        });
 
         let content;
 
         if (reqList.length === 0) {
             content = (
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'gray', fontFamily: 'suite', paddingTop: '50px' }}>
-                    요청이 없습니다
+                    요청이 없습니다.
                 </div>
             );
         } else {
@@ -217,7 +228,7 @@ export default function ReqCentre() {
                         </div>
                         <div>
                             <span>요청구분 : </span>
-                            <span style={{ marginLeft: '15px', fontWeight: 'bold' }} >{ getType(reqList[parseInt(getURLString("s")) - 1]["type"]) }</span>
+                            <span style={{ marginLeft: '15px', fontWeight: 'bold' }} >{ getType_Req(reqList[parseInt(getURLString("s")) - 1]["type"]) }</span>
                         </div>
                         <div>
                             <span>요청인 : </span>
@@ -237,7 +248,7 @@ export default function ReqCentre() {
                             reqList.map((item, idx) => {
                                 return (
                                     <div key={idx} className={"posthoverstyle"} style={{ display: 'flex', padding: '1%', width: '90%', border: '1px solid gray', marginTop: '10px', borderRadius: '5px' }} onClick={() => window.location.assign(`.?pid=3&t=chk&s=${idx + 1}`)}>
-                                        <div style={{ width: '100px', marginLeft: '10px', marginRight: '25px', fontWeight: 'bold', textAlign: 'center' }}>{ getType(item["type"]) }</div>
+                                        <div style={{ width: '100px', marginLeft: '10px', marginRight: '25px', fontWeight: 'bold', textAlign: 'center' }}>{ getType_Req(item["type"]) }</div>
                                         <div style={{ width: '500px' }}>({item["date"].replaceAll("-", ".")}에 전송)</div>
                                         <div>답변여부</div>
                                         <div style={{ fontWeight: 'bold', marginLeft: '10px' }}>{ (item["response"]) ? "예" : "아니요"}</div>
@@ -266,15 +277,4 @@ export default function ReqCentre() {
             { page }
         </div>
     );
-}
-
-const getType = (typeName) => {
-    switch(typeName) {
-        case "lawreq_new": return (<>법률추가신청</>);
-        case "lawreq_delete": return (<>법률제거신청</>);
-        case "lawreq_edit": return (<>법률수정신청</>);
-        case "servreq": return (<>서버건의</>);
-        case "namereq": return (<>이름변경신청</>);
-        default: return getType;
-    }
 }

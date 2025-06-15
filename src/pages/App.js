@@ -104,8 +104,8 @@ function App() {
             window.location.assign("https://dslwiki.kro.kr");
             break;
         }
-        case 'M': {
-            if (getPermission(userInf).includes("관리자")) page = <Management/>;
+        case 'm': {
+            if (getPermission(userInf).includes("관리자")) page = <Management userInf={userInf}/>;
             else window.location.assign(".?pid=er404");
             break;
         }

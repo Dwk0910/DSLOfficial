@@ -28,7 +28,7 @@ export default function Topmenu() {
 
     if (getPermission(userInf).includes("관리자")) {
         menuArray.push({
-            pid: 'M',
+            pid: 'm',
             title: '관리'
         });
     }

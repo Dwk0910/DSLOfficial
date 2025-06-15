@@ -150,9 +150,113 @@ export default function Main() {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '30px' }}>
                 <span style={{ fontFamily: 'suite', fontWeight: 'bold', fontSize: '1.2rem' }}>{ ls.get("id") }</span>
                 <span style={{ fontFamily: 'suite', fontSize: '0.9rem' }}>{ userInf ? (<span>{ getPermission(userInf) }</span>) : (<span>로딩 중...</span>) }</span>
-                <span style={{ fontFamily: 'suite', fontSize: '0.9rem' }}>{ userInf ? (<span>{ userInf["date"] } 가입</span>) : (<span>로딩 중...</span>) }</span>
+                <span style={{ fontFamily: 'suite', fontSize: '0.9rem' }}>{ userInf ? (<span>{ userInf["date"].replaceAll("-", ".") } 가입</span>) : (<span>로딩 중...</span>) }</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingRight: '30px' }}>
+                <input
+                    type="button"
+                    value="비밀번호 변경"
+                    onClick={() => {
+                        const bg = document.createElement('div');
+                        bg.style.position = 'fixed';
+                        bg.style.top = 0;
+                        bg.style.left = 0;
+                        bg.style.width = '100%';
+                        bg.style.height = '100%';
+                        bg.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                        bg.style.display = 'flex';
+                        bg.style.justifyContent = 'center';
+                        bg.style.alignItems = 'center';
+                        bg.style.zIndex = 9999;
+
+                        const popup = document.createElement('div');
+                        popup.style.backgroundColor = 'white';
+                        popup.style.padding = '20px';
+                        popup.style.borderRadius = '8px';
+                        popup.style.display = 'flex';
+                        popup.style.flexDirection = 'column';
+                        popup.style.alignItems = 'center';
+
+                        const label1 = document.createElement('div');
+                        label1.textContent = '바꿀 비밀번호를 입력해 주세요';
+                        label1.style.marginBottom = '10px';
+
+                        const input1 = document.createElement('input');
+                        input1.type = 'password';
+                        input1.style.marginBottom = '10px';
+                        input1.style.padding = '5px';
+
+                        const label2 = document.createElement('div');
+                        label2.textContent = '비밀번호를 다시 입력해 주세요';
+                        label2.style.marginBottom = '10px';
+
+                        const input2 = document.createElement('input');
+                        input2.type = 'password';
+                        input2.style.marginBottom = '10px';
+                        input2.style.padding = '5px';
+
+                        const buttonWrap = document.createElement('div');
+
+                        const okBtn = document.createElement('button');
+                        okBtn.textContent = '확인';
+                        okBtn.style.marginRight = '10px';
+                        okBtn.style.fontFamily = 'suite';
+                        okBtn.style.cursor = 'pointer';
+                        okBtn.onclick = () => {
+                            if (input1.value !== input2.value) {
+                                alert('비밀번호가 다릅니다');
+                            } else {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "https://neatorebackend.kro.kr/dslofficial/editUserInfo",
+                                    contentType: "application/json; charset=utf-8",
+                                    data: JSON.stringify({
+                                        CTPD: process.env.REACT_APP_CTPD,
+                                        id: userInf["id"],
+                                        perm: userInf["perm"],
+                                        pwd: sha256(input1.value),
+                                        date: "0000-00-00" //dummy
+                                    })
+                                }).then((r) => {
+                                    console.log(r);
+                                    if (JSON.parse(r)["status"] === "true") {
+                                        alert("변경이 완료되었습니다.");
+                                        window.location.reload();
+                                    }
+                                    document.body.removeChild(bg);
+                                });
+                            }
+                        };
+
+                        const cancelBtn = document.createElement('button');
+                        cancelBtn.textContent = '취소';
+                        cancelBtn.style.fontFamily = 'suite';
+                        cancelBtn.style.cursor = 'pointer';
+                        cancelBtn.onclick = () => {
+                            document.body.removeChild(bg);
+                        };
+
+                        buttonWrap.appendChild(okBtn);
+                        buttonWrap.appendChild(cancelBtn);
+
+                        popup.appendChild(label1);
+                        popup.appendChild(input1);
+                        popup.appendChild(label2);
+                        popup.appendChild(input2);
+                        popup.appendChild(buttonWrap);
+
+                        bg.appendChild(popup);
+                        document.body.appendChild(bg);
+                    }}
+                    style={{
+                        marginRight: '10px',
+                        marginTop: '20px',
+                        padding: '10px',
+                        cursor: 'pointer',
+                        fontFamily: 'suite',
+                        fontWeight: 'bold'
+                    }}
+                />
                 <input type={"button"} value={"내정보"} onClick={() => { alert("Coming soon!\n개발 중입니다.") }} style={{ marginRight: '10px', marginTop: '20px', padding: '10px', cursor: 'pointer', fontFamily: 'suite', fontWeight: 'bold' }}/>
                 <input type={"button"} value={"로그아웃"} onClick={() => {
                     if (window.confirm("정말 로그아웃 하시겠습니까?") === true) {

@@ -118,3 +118,15 @@ export const getType = (type, isHtoE) => {
         }
     }
 }
+
+
+export const getType_Req = (typeName) => {
+    switch(typeName) {
+        case "lawreq_new": return ("법률추가신청");
+        case "lawreq_delete": return ("법률제거신청");
+        case "lawreq_edit": return ("법률수정신청");
+        case "servreq": return "서버건의";
+        case "namereq": return "이름변경신청";
+        default: return getType;
+    }
+}

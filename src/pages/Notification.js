@@ -108,22 +108,22 @@ export default function Notification() {
     }
 
     if (getURLString("editmode") !== "0") {
+        targetPost = postList.find((e) => e.t === getURLString("t"));
+        if (!targetPost) {
+            window.location.assign(".?pid=er404");
+            return (<span></span>);
+        }
+
         if (getPermission(userInf) === "unauthorized") {
             window.location.assign(".?pid=er401")
             return;
-        } else if (targetPost["author"] === userInf["id"]) {
+        } else if (targetPost["author"] !== userInf["id"]) {
             window.location.assign(".?pid=er403");
             return;
         }
 
         if (target !== "0") {
             if (editmode === "delete") {
-                let targetContent = postList?.find((e) => e?.t === target);
-                if (!targetContent) {
-                    window.location.assign(".?pid=er404");
-                    return;
-                }
-
                 $.ajax({
                     type: "POST",
                     url: "https://neatorebackend.kro.kr/dslofficial/deletePost",
@@ -144,7 +144,6 @@ export default function Notification() {
                 return (<span>Redirecting...</span>);
             }
         }
-
     } else if (target === 'n') {
         let editmode = false;
         if (getURLString("et") !== "0") {
