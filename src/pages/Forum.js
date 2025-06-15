@@ -9,14 +9,28 @@ import banner from '../docs/banners/freeforum_banner.png';
 import Loading from '../component/Loading';
 
 import { useState, useEffect, useCallback } from 'react';
-import { decodeUrlSafeBase64, encodeUrlSafeBase64, getType, getURLString, getUserInfo, LocalStorage } from "../Util";
+import {
+    decodeUrlSafeBase64,
+    encodeUrlSafeBase64,
+    getType,
+    getURLString,
+    getUserInfo,
+    LocalStorage,
+    shortenText
+} from "../Util";
 
 export default function Forum() {
+    const [commentLengths, setCommentLengths] = useState(undefined);
+
+    // only for ?pid=2
+    const [postList, setPostList] = useState(undefined);
+
+    // only for ?pid=2&t=XXX
+    const [post, setPost] = useState(undefined);
+    const [comments, setComments] = useState(undefined);
 
     const [loading, setLoading] = useState(true);
-    const [postList, setPostList] = useState(undefined);
     const [userInf, setUserInf] = useState();
-
     const ls = LocalStorage();
     const [mdValue, setMdValue] = useState((ls.get("edit_content")) ? decodeUrlSafeBase64(ls.get("edit_content")) : '');
     const [title, setTitle] = useState((ls.get("edit_title")) ? decodeUrlSafeBase64(ls.get("edit_title")) : '');
@@ -40,17 +54,49 @@ export default function Forum() {
         }).then((response) => {
             const jsonResponse = JSON.parse(response);
             const array = [];
-            for (let i = 0; i < jsonResponse.length; i++) {
-                if (jsonResponse[i]["type"] !== "notification") array[i] = jsonResponse[i];
+            for (let i = 0; i < JSON.parse(jsonResponse["postList"]).length; i++) {
+                if (JSON.parse(jsonResponse["postList"])[i]["type"] !== "notification") array[i] = JSON.parse(jsonResponse["postList"])[i];
             }
 
             setPostList(array.reverse());
+            setCommentLengths(JSON.parse(jsonResponse["commentLengths"]));
         });
     }, []);
 
     useEffect(() => {
-        if (userInf && postList) setLoading(false);
-    }, [userInf, postList])
+        if (getURLString("t") !== "0" && getURLString("t") !== "n") {
+            $.ajax({
+                type: "POST",
+                url: "https://neatorebackend.kro.kr/dslofficial/getPost",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    CTPD: process.env.REACT_APP_CTPD,
+                    t: getURLString("t"),
+                })
+            }).then((r) => {
+                setPost(JSON.parse(r));
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "https://neatorebackend.kro.kr/dslofficial/getComment",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    CTPD: process.env.REACT_APP_CTPD,
+                    t: getURLString("t")
+                })
+            }).then((r) => {
+                setComments(JSON.parse(r));
+            })
+        } else {
+            setPost('NONE');
+            setComments('NONE');
+        }
+    }, []);
+
+    useEffect(() => {
+        if (userInf && postList && post && comments) setLoading(false);
+    }, [userInf, postList, post, comments])
 
 
     // Event Listener
@@ -82,7 +128,7 @@ export default function Forum() {
                 <div key={item["t"]} style={{ width: '100%', display: 'flex', alignItems: 'center', height: '30px', borderBottom: '1px solid gray' }}>
                     <div style={{ textAlign: 'center', width: '100px' }}>{ item["t"] }</div>
                     <div style={{ textAlign: 'center', width: '120px' }}>{ getType(item["type"]) }</div>
-                    <div style={{ textAlign: 'left', width: '400px' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>{ item["name"] }</div>
+                    <div style={{ textAlign: 'left', width: '400px' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>{ shortenText(item["name"], 32) + ` ${(commentLengths[item["t"]] !== 0) ? "[" + commentLengths[item["t"]] + "]" : ""}` }</div>
                     <div style={{ textAlign: 'center', width: '150px' }}>{ item["author"] }</div>
                     <div style={{ textAlign: 'center', width: '150px' }}>{ item["date"].replaceAll("-", ".") }</div>
                 </div>
@@ -133,7 +179,7 @@ export default function Forum() {
 
             // et !== 0, 게시글 수정 밑작업
             if (getURLString("et") !== "0") {
-                const target = postList.find(item => item["t"] === getURLString("et"));
+                const target = postList.find(item => item?.t === getURLString("et"));
                 if (!target) {
                     window.location.assign(".?pid=er404");
                     return;
@@ -251,13 +297,16 @@ export default function Forum() {
 
         default: {
             // 게시글 보기
-            document.documentElement.setAttribute("data-color-mode", "light")
-            const target = postList?.find((e) => e?.t === getURLString("t"));
-            const commentElements = (target["comments"].length !== 0) ? (
-                target["comments"].map((e, idx) => {
+            document.documentElement.setAttribute("data-color-mode", "light");
+
+            const commentElements = (commentLengths[post["t"]] !== 0) ? (
+                comments.map((e, idx) => {
+                    let style = { display: 'flex', flexDirection: 'row', width: '100%', padding: '1% 0 1% 0', borderBottom: '1px solid gray' }
+                    if (e["content"] === "삭제된 댓글입니다.") style["backgroundColor"] = "rgba(0, 0, 0, 0.07)";
+
                     return (
-                        <span key={idx} style={{ display: 'flex', flexDirection: 'row', width: '100%', padding: '1% 0 1% 0', borderBottom: '1px solid gray' }}>
-                            <div style={{ marginLeft: '5px', width: '200px' }}>{ e["author"] }</div>
+                        <span key={idx} style={style}>
+                            <div style={{ marginLeft: '10px', width: '200px' }}>{ e["author"] }</div>
                             <div style={{ width: '63%', overflowWrap: "break-word" }}>{ e["content"] }</div>
                             <div style={{ marginLeft: '2%' }}>{ e["date"].replaceAll("-", ".") }</div>
                             { (e["author"] === userInf["id"] && e["content"] !== "삭제된 댓글입니다.") ? <span className={"posthoverstyle"} style={{ marginLeft: '7px', height: '30px' }} onClick={() => {
@@ -269,7 +318,7 @@ export default function Forum() {
                                         data: JSON.stringify({
                                             CTPD: process.env.REACT_APP_CTPD,
                                             t: getURLString("t"),
-                                            idx: idx
+                                            ucid: e["ucid"]
                                         })
                                     }).then((r) => {
                                         if (JSON.parse(r)["status"] === "true") {
@@ -288,7 +337,7 @@ export default function Forum() {
                 </div>
             );
 
-            if (target) {
+            if (post) {
                 return (
                     <div style={{ width: '100%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
                         <img src={ banner } alt={"banner"} style={{ width: '91%', marginTop: '20px' }}/>
@@ -296,32 +345,32 @@ export default function Forum() {
                             <span className={"hoverstyle"} style={{ width: '100%', marginLeft: '10px', textAlign: 'left', fontFamily: 'suite', marginBottom: '5px' }} onClick={() => window.location.assign(".?pid=2")}>{"< 돌아가기"}</span>
                         </div>
                         <div style={{ width: '90.9%', display: 'flex', flexDirection: 'column', fontFamily: 'suite', borderTop: '1px solid gray', borderBottom: '1px solid gray', paddingBottom: '15px', marginTop: '20px' }}>
-                            <span style={{ fontWeight: 'bold', marginTop: '10px', marginLeft: '15px', fontSize: '1.1rem' }}>{`[${getType(target["type"], false)}] ${target["name"]}`}</span>
+                            <span style={{ fontWeight: 'bold', marginTop: '10px', marginLeft: '15px', fontSize: '1.1rem' }}>{`[${getType(post["type"], false)}] ${post["name"]}`}</span>
                             <div style={{ marginTop: '10px', display: 'flex' }}>
+                        <span>
+                            <span style={{ marginLeft: '15px' }}>작성자</span>
+                            <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["author"] }</span>
+                        </span>
                                 <span>
-                                    <span style={{ marginLeft: '15px' }}>작성자</span>
-                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ target["author"] }</span>
-                                </span>
+                            <span style={{ marginLeft: '15px' }}>작성번호</span>
+                            <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["t"] }</span>
+                        </span>
                                 <span>
-                                    <span style={{ marginLeft: '15px' }}>작성번호</span>
-                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ target["t"] }</span>
-                                </span>
+                            <span style={{ marginLeft: '15px' }}>작성일</span>
+                            <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["date"].replaceAll("-", ".") }</span>
+                        </span>
                                 <span>
-                                    <span style={{ marginLeft: '15px' }}>작성일</span>
-                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ target["date"].replaceAll("-", ".") }</span>
-                                </span>
-                                <span>
-                                    <span style={{ marginLeft: '15px' }}>댓글</span>
-                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ target["comments"].length }</span>
-                                </span>
+                            <span style={{ marginLeft: '15px' }}>댓글</span>
+                            <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ commentLengths[post["t"]] }</span>
+                        </span>
                                 {
-                                    (target["author"] === userInf["id"]) ? (
+                                    (post["author"] === userInf["id"]) ? (
                                         <div style={{ marginLeft: "250px" }}>
-                                            <span className={"postmenuhoverstyle"} onClick={() => {
-                                                window.location.assign(`.?pid=2&t=n&et=${getURLString("t")}`);
-                                                ls.set("edit_title", encodeUrlSafeBase64(target["name"]));
-                                                ls.set("edit_content", encodeUrlSafeBase64(target["content"]));
-                                            }}><Pencil size={20}/></span>
+                                    <span className={"postmenuhoverstyle"} onClick={() => {
+                                        window.location.assign(`.?pid=2&t=n&et=${getURLString("t")}`);
+                                        ls.set("edit_title", encodeUrlSafeBase64(post["name"]));
+                                        ls.set("edit_content", encodeUrlSafeBase64(post["content"]));
+                                    }}><Pencil size={20}/></span>
                                             <span className={"postmenuhoverstyle"} style={{ marginLeft: '45px' }} onClick={() => {
                                                 if (window.confirm("이 게시글을 삭제하시겠습니까?")) {
                                                     $.ajax({
@@ -348,11 +397,11 @@ export default function Forum() {
                             </div>
                         </div>
                         <div style={{ width: '90.9%' }}>
-                            <MDEdit.Markdown source={ target["content"] } style={{ width: '100%', marginTop: '15px', minHeight: "500px", borderBottom: '1px solid gray' }}/>
+                            <MDEdit.Markdown source={ post["content"] } style={{ width: '100%', marginTop: '15px', minHeight: "500px", borderBottom: '1px solid gray', paddingBottom: '25px' }}/>
                         </div>
                         <div style={{ marginTop: '10px', borderBottom: '2px solid skyblue', width: '90.9%', paddingBottom: '10px' }}>
                             <span style={{ fontWeight: 'bold' }}>전체 댓글</span>
-                            <span style={{ marginLeft: '5px', color: 'red', fontWeight: 'bold'}}>{ target["comments"].length }</span>
+                            <span style={{ marginLeft: '5px', color: 'red', fontWeight: 'bold'}}>{ commentLengths[post["t"]] }</span>
                             <span style={{ fontWeight: 'bold' }}>개</span>
                         </div>
                         <div style={{ width: '90.9%', marginBottom: '5px', fontFamily: 'suite' }}>
@@ -367,6 +416,12 @@ export default function Forum() {
                                             return;
                                         }
 
+                                        if (comment === "삭제된 댓글입니다.") {
+                                            alert("댓글로 등록할 수 없는 내용입니다.");
+                                            e.preventDefault();
+                                            return;
+                                        }
+
                                         if (window.confirm("댓글로 등록하시겠습니까?")) {
                                             const date = new Date();
                                             $.ajax({
@@ -376,6 +431,7 @@ export default function Forum() {
                                                 data: JSON.stringify({
                                                     CTPD: process.env.REACT_APP_CTPD,
                                                     t: getURLString("t"),
+                                                    basedComment: "none",
                                                     author: userInf["id"],
                                                     date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
                                                     content: comment
@@ -384,7 +440,7 @@ export default function Forum() {
                                                 if (JSON.parse(response)["status"] === "true") {
                                                     alert("댓글이 등록되었습니다.");
                                                     window.location.reload();
-                                                }
+                                                } else console.log(response);
                                             });
                                         }
 
@@ -399,10 +455,9 @@ export default function Forum() {
                             { commentElements }
                         </div>
                     </div>
-                )
+                );
             } else {
                 window.location.assign(".?pid=er404");
-                return;
             }
         }
     }

@@ -37,8 +37,14 @@ export default function Management(props) {
             data: JSON.stringify({
                 CTPD: process.env.REACT_APP_CTPD
             })
-        }).then((r) => {
-            setPostList(JSON.parse(r));
+        }).then((response) => {
+            const jsonResponse = JSON.parse(response);
+            const array = [];
+            for (let i = 0; i < JSON.parse(jsonResponse["postList"]).length; i++) {
+                array[i] = JSON.parse(jsonResponse["postList"])[i];
+            }
+
+            setPostList(array.reverse());
         });
 
         $.ajax({
@@ -83,27 +89,34 @@ export default function Management(props) {
                 content = (
                     <div style={{ width: '100%' }}>
                         <input type={"button"} value={"유저 추가"} style={{ marginLeft: '15px', marginBottom: '10px' }} onClick={() => {
-                            const id = prompt("유저 아이디를 입력하세요")
-                            const perm = prompt("유저 권한 번호를 입렫력하세요 ([1]일반유저, [2]매니저, [3]관리자, [4]총관리자)");
-                            const pwd = sha256("abcd1234");
+                            const id = prompt("유저 아이디를 입력하세요");
+                            if (id) {
+                                const perm = prompt("유저 권한 번호를 입렫력하세요 ([1]일반유저, [2]매니저, [3]관리자, [4]총관리자)");
+                                const pwd = sha256("abcd1234");
 
-                            $.ajax({
-                                type: "POST",
-                                url: "https://neatorebackend.kro.kr/dslofficial/register",
-                                contentType: "application/json; charset=utf-8",
-                                data: JSON.stringify({
-                                    CTPD: process.env.REACT_APP_CTPD,
-                                    id: id,
-                                    pwd: pwd,
-                                    perm: perm,
-                                    date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-                                })
-                            }).then((r) => {
-                                if (JSON.parse(r)["status"] === "true") {
-                                    alert("가입 성공");
-                                    window.location.reload();
-                                } else console.log(r);
-                            })
+                                if (!id || !perm) return;
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "https://neatorebackend.kro.kr/dslofficial/register",
+                                    contentType: "application/json; charset=utf-8",
+                                    data: JSON.stringify({
+                                        CTPD: process.env.REACT_APP_CTPD,
+                                        id: id,
+                                        pwd: pwd,
+                                        perm: perm,
+                                        date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+                                    })
+                                }).then((r) => {
+                                    if (JSON.parse(r)["status"] === "true") {
+                                        alert("가입 성공");
+                                        window.location.reload();
+                                    } else if (JSON.parse(r)["status"] === "idexist") {
+                                        alert("이미 존재하는 아이디입니다");
+                                        window.location.reload();
+                                    } else console.log(r);
+                                });
+                            }
                         }}/>
                         { userList.map((item, idx) => {
                             return (
@@ -175,9 +188,16 @@ export default function Management(props) {
                                         <div key={idx} style={{ display: 'flex', flexDirection: 'row' }}>
                                             <div style={{ width: '100px', textAlign: 'center' }}>{item["t"]}</div>
                                             <div style={{ width: '100px', textAlign: 'center' }}>{getType(item["type"], false)}</div>
-                                            <div style={{ width: '600px'}}>{item["name"]}</div>
-                                            <div style={{ width: '150px'}}>{item["author"]}</div>
-                                            <div style={{ width: '200px'}}>{item["date"]}</div>
+                                            {
+                                                (item["type"] === "notification") ?
+                                                    (
+                                                        <div style={{ width: '600px', fontWeight: 'bold' }}>{item["name"]}</div>
+                                                    ) : (
+                                                        <div style={{ width: '600px' }}>{item["name"]}</div>
+                                                    )
+                                            }
+                                            <div style={{ width: '150px' }}>{item["author"]}</div>
+                                            <div style={{ width: '200px' }}>{item["date"]}</div>
                                             <input type={"button"} value={"삭제"} style={{ marginRight: '20px'}} onClick={() => {
                                                 if (window.confirm("정말 이 게시글을 삭제하시겠습니까?")) {
                                                     $.ajax({
