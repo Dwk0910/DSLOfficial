@@ -72,10 +72,10 @@ export default function Main() {
                 CTPD: process.env.REACT_APP_CTPD
             })
         }).then((response) => {
-            const jsonResponse = JSON.parse(response);
+            const jsonResponse = JSON.parse(JSON.parse(response)["postList"]);
             const array = [];
             for (let i = 0; i < jsonResponse.length; i++) if (jsonResponse[i]["type"] === "notification") array[i] = jsonResponse[i];
-            setPostList(array);
+            setPostList(array.reverse());
             setLoading_post(false);
         })
     }, []);
@@ -138,7 +138,6 @@ export default function Main() {
                 <input name={"pwd"} type={"password"} placeholder={"비밀번호"} style={{ width: '200px', height: '25px', marginTop: '5px', fontFamily: 'suite' }} onChange={(e) => { setPwd(e.target.value); }}/>
                 <input type={"submit"} value={"로그인"} style={{ position: 'absolute', width: '80px', height: '67px', marginLeft: '6px', fontFamily: 'suite', fontWeight: 'bold', marginTop: '-31px', cursor: 'pointer', fontSize: '1.02rem' }}/>
             </form>
-            <span className={"hoverstyle"} style={{ fontFamily: 'suite', fontSize: '0.8rem', color: 'gray' }}>비밀번호를 잊었습니다</span><br/>
             <span style={{ fontFamily: 'suite', fontWeight: 'bold', fontSize: '0.8rem', color: 'darkorange' }}>* 자동로그인이 기본으로 활성화되어 있습니다.</span><br/>
             <span style={{ fontFamily: 'suite', fontWeight: 'bold', fontSize: '0.8rem', color: 'darkorange' }}>* 회원가입은 서버관리자에게 문의바랍니다.</span>
         </React.Fragment>
@@ -205,6 +204,8 @@ export default function Main() {
                         okBtn.onclick = () => {
                             if (input1.value !== input2.value) {
                                 alert('비밀번호가 다릅니다');
+                            } else if (input1.value === '' || input2.value === '') {
+                                alert('입력란이 비었습니다');
                             } else {
                                 $.ajax({
                                     type: "POST",

@@ -119,7 +119,6 @@ export const getType = (type, isHtoE) => {
     }
 }
 
-
 export const getType_Req = (typeName) => {
     switch(typeName) {
         case "lawreq_new": return ("법률추가신청");
@@ -128,5 +127,13 @@ export const getType_Req = (typeName) => {
         case "servreq": return "서버건의";
         case "namereq": return "이름변경신청";
         default: return getType;
+    }
+}
+
+export const shortenText = (text, maxLength = 20) => {
+    if (text.length > maxLength) {
+        return text.slice(0, maxLength) + '...';
+    } else {
+        return text;
     }
 }

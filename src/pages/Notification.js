@@ -21,9 +21,7 @@ import Loading from '../component/Loading';
 export default function Notification() {
     document.title = "DSL OFFICIAL - 공지";
 
-    const [loading_user, setLoading_user] = useState(true);
-    const [loading_post, setLoading_post] = useState(true);
-
+    const [targetContent, setTargetContent] = useState(null);
     const [postList, setPostList] = useState([]);
     let postComponentList = [];
 
@@ -38,20 +36,32 @@ export default function Notification() {
         }).then((response) => {
             const jsonResponse = JSON.parse(response);
             const array = [];
-            for (let i = 0; i < jsonResponse.length; i++) {
-                if (jsonResponse[i]["type"] === "notification") array[i] = jsonResponse[i]; // 공지페이지 이므로 type이 notification인 것들만 가져옴
+            for (let i = 0; i < JSON.parse(jsonResponse["postList"]).length; i++) {
+                if (JSON.parse(jsonResponse["postList"])[i]["type"] === "notification") array[i] = JSON.parse(jsonResponse["postList"])[i]; // 공지페이지 이므로 type이 notification인 것들만 가져옴
             }
 
             setPostList(array.reverse());
-            setLoading_post(false);
-        })
+        });
+
+        if (getURLString("t") !== "0" && getURLString("t") !== "n") {
+            $.ajax({
+                url: "https://neatorebackend.kro.kr/dslofficial/getPost",
+                type: "POST",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    CTPD: process.env.REACT_APP_CTPD,
+                    t: getURLString("t")
+                })
+            }).then((response) => {
+                setTargetContent(JSON.parse(response));
+            })
+        } else setTargetContent("NONE");
     }, []);
 
     const [userInf, setUserInf] = useState();
     useEffect(() => {
         getUserInfo().then((e) => {
             setUserInf(e);
-            setLoading_user(false);
         });
     }, []);
 
@@ -62,7 +72,7 @@ export default function Notification() {
 
     // Event Listener
     const handleBeforeUnload = useCallback((e) => {
-        if (mdValue !== '' || title !== '') {
+        if ((mdValue !== '' || title !== '') && getURLString("t") === "n") {
             e.preventDefault();
             e.returnValue = '';
         }
@@ -85,13 +95,10 @@ export default function Notification() {
         }
     }, [perm, userInf]);
 
-    let targetPost = null;
-
     if (getURLString("name"))
-        if (loading_user || loading_post) {
+        if (!userInf || !postList || !targetContent) {
             return (<Loading/>);
         }
-
 
     // AFTER LOADING (RENDER)
     let content;
@@ -99,8 +106,9 @@ export default function Notification() {
     const target = getURLString("t");
     const editmode = getURLString("editmode");
 
+    const targetPost = targetContent;
+
     if (getURLString("et") !== "0" && getURLString("t") === "n") {
-        targetPost = postList.find((e) => e.t === getURLString("et"));
         if (!targetPost) {
             window.location.assign(".?pid=er404");
             return (<span></span>);
@@ -108,7 +116,6 @@ export default function Notification() {
     }
 
     if (getURLString("editmode") !== "0") {
-        targetPost = postList.find((e) => e.t === getURLString("t"));
         if (!targetPost) {
             window.location.assign(".?pid=er404");
             return (<span></span>);
@@ -280,7 +287,7 @@ export default function Notification() {
             </div>
         );
     } else if (target !== '0') {
-        let targetContent = postList?.find((e) => e?.t === target);
+
         if (!targetContent) {
             window.location.assign(".?pid=er404");
             return;
