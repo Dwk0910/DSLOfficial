@@ -2,7 +2,7 @@ import * as React from "react";
 import $ from 'jquery';
 import MDEdit from "@uiw/react-md-editor";
 
-import { Trash, Pencil, CornerDownRight } from 'lucide-react';
+import { Trash, Pencil, CornerDownRight, Crown } from 'lucide-react';
 
 import banner from '../docs/banners/freeforum_banner.png';
 
@@ -133,7 +133,7 @@ export default function Forum() {
                 <div key={item["t"]} style={{ width: '100%', display: 'flex', alignItems: 'center', height: '30px', borderBottom: '1px solid gray' }}>
                     <div style={{ textAlign: 'center', width: '100px' }}>{ item["t"] }</div>
                     <div style={{ textAlign: 'center', width: '120px' }}>{ getType(item["type"]) }</div>
-                    <div style={{ textAlign: 'left', width: '400px' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>
+                    <div style={{ textAlign: 'left', width: '400px', fontFamily: 'sans-serif', fontSize: '0.95rem' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>
                         {
                             shortenText(item["name"], 32)
                         }
@@ -171,7 +171,7 @@ export default function Forum() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', fontFamily: 'suite', minHeight: '500px', marginTop: '20px' }}>
                         <div style={{ width: '100%', display: 'flex', alignItems: 'center', height: '40px', borderBottom: '1px solid gray', borderTop: '1px solid gray' }}>
-                            <div style={{ textAlign: 'center', width: '100px' }}>번호</div>
+                            <div style={{ textAlign: 'center', width: '100px' }}>작성번호</div>
                             <div style={{ textAlign: 'center', width: '120px' }}>말머리</div>
                             <div style={{ textAlign: 'center', width: '400px' }}>제목</div>
                             <div style={{ textAlign: 'center', width: '150px' }}>글쓴이</div>
@@ -233,7 +233,7 @@ export default function Forum() {
                                             type: getType(header, true),
                                             name: title,
                                             author: userInf["id"],
-                                            date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+                                            date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`,
                                             content: mdValue
                                         })
                                     }).then((r) => {
@@ -285,7 +285,7 @@ export default function Forum() {
                                     <option>질문</option>
                                     <option>TMI</option>
                                 </select>
-                                <input type={"text"} style={{ fontFamily: 'suite', fontSize: '1.8rem', fontWeight: 'bold', padding: '1%', width: '100%', height: '40px', marginTop: '10px', border: '1px solid gray' }} placeholder={"제목을 입력해 주세요"} value={title} onChange={(e) => setTitle(e.target.value)}/>
+                                <input type={"text"} style={{ fontFamily: 'sans-serif', fontSize: '1.7rem', fontWeight: 'bold', padding: '1%', width: '100%', height: '40px', marginTop: '10px', border: '1px solid gray' }} placeholder={"제목을 입력해 주세요"} value={title} onChange={(e) => setTitle(e.target.value)}/>
                             </div>
                             <MDEdit style={{marginTop: '30px', minHeight: '500px'}}
                                     value={ mdValue }
@@ -349,10 +349,17 @@ export default function Forum() {
                                         display: 'flex'
                                     }}>
                                         <CornerDownRight size={13} style={{marginLeft: '25px', marginRight: '5px', color: '#072bd9'}}/>
-                                        <div style={{width: "200px"}}>{doubleComment["author"]}</div>
+                                        <div style={{ width: "200px", display: 'flex', alignItems: 'center' }}>
+                                            {(doubleComment["author"] === post["author"]) ? (
+                                                <Crown size={10} style={{ color: "yellow", borderRadius: '50%', padding: '3px', marginRight: '7px', border: '1px solid yellow' }}/>
+                                            ) : ""}
+                                            {doubleComment["author"]}
+                                        </div>
                                         <div style={{
                                             width: "430px",
-                                            overflowWrap: "break-word"
+                                            overflowWrap: "break-word",
+                                            fontFamily: 'sans-serif',
+                                            fontSize: '0.95rem'
                                         }}>{doubleComment["content"]}</div>
                                         <div
                                             style={{marginLeft: "20px"}}>{doubleComment["date"].replaceAll("-", ".")}</div>
@@ -377,7 +384,7 @@ export default function Forum() {
                                                           });
                                                       }
                                                   }}>
-                                                <Trash size={20}/>
+                                                <Trash size={16}/>
                                             </span> : ""
                                         }
                                     </div>
@@ -390,16 +397,21 @@ export default function Forum() {
                         // 비로그인 상태, 지워진 댓글에선 대댓추가 불가
                         const canAddDoubleComment = (userInf["id"] !== "userstatus_unlogined" && e["content"] !== "삭제된 댓글입니다.");
                         const contentStyle = (canAddDoubleComment) ? {
-                            width: '63%', overflowWrap: "break-word", cursor: "pointer"
+                            width: '63%', overflowWrap: "break-word", fontFamily: 'sans-serif', fontSize: '0.95rem', cursor: "pointer"
                         } : {
-                            width: '63%', overflowWrap: "break-word"
+                            width: '63%', overflowWrap: "break-word", fontFamily: 'sans-serif', fontSize: '0.95rem'
                         };
 
                         // 일반댓글(답글아님) 출력
                         commentElements.push(
                             <div key={idx}>
                             <span style={style}>
-                                <div style={{marginLeft: '10px', width: '200px'}}>{e["author"]}</div>
+                                <div style={{ marginLeft: '10px', width: "200px", display: 'flex', alignItems: 'center' }}>
+                                    {(e["author"] === post["author"]) ? (
+                                        <Crown size={10} style={{ color: "yellow", borderRadius: '50%', padding: '3px', marginRight: '7px', border: '1px solid yellow' }}/>
+                                    ) : ""}
+                                    {e["author"]}
+                                </div>
                                 <div style={ contentStyle }
                                      onClick={() => {
                                          if (canAddDoubleComment) {
@@ -409,10 +421,11 @@ export default function Forum() {
                                                  [e["ucid"]]: (!doubleCommentField?.[e["ucid"]])
                                              }));
                                          }
-                                     }}>{e["content"]}</div>
-                                <div style={{marginLeft: '2%'}}>{e["date"].replaceAll("-", ".")}</div>
+                                     }
+                                }>{e["content"]}</div>
+                                <div style={{ marginLeft: '2%' }}>{e["date"].replaceAll("-", ".")}</div>
                                 {(e["author"] === userInf["id"] && e["content"] !== "삭제된 댓글입니다.") ?
-                                    <span className={"posthoverstyle"} style={{marginLeft: '7px'}} onClick={() => {
+                                    <span className={"posthoverstyle"} style={{ marginLeft: '7px' }} onClick={() => {
                                         if (window.confirm("댓글을 삭제하시겠습니까?")) {
                                             $.ajax({
                                                 type: "POST",
@@ -430,7 +443,7 @@ export default function Forum() {
                                                 }
                                             });
                                         }
-                                    }}><Trash size={20}/></span> : ""
+                                    }}><Trash size={16}/></span> : ""
                                 }
                             </span>
                                 {
@@ -459,8 +472,8 @@ export default function Forum() {
                                                 marginTop: '10px',
                                                 height: '50px',
                                                 margin: '1%',
-                                                fontFamily: 'suite',
-                                                fontSize: '1rem',
+                                                fontFamily: 'sans-serif',
+                                                fontSize: '0.95rem',
                                                 resize: 'none'
                                             }} placeholder={"타인의 권리를 침해하거나 명예를 훼손하는 댓글은 서버법률에 따라 처벌 받으실 수 있습니다."}
                                                       value={doubleComment}
@@ -532,7 +545,7 @@ export default function Forum() {
                             <span className={"hoverstyle"} style={{ width: '100%', marginLeft: '10px', textAlign: 'left', fontFamily: 'suite', marginBottom: '5px' }} onClick={() => window.location.assign(".?pid=2")}>{"< 돌아가기"}</span>
                         </div>
                         <div style={{ width: '90.9%', display: 'flex', flexDirection: 'column', fontFamily: 'suite', borderTop: '1px solid gray', borderBottom: '1px solid gray', paddingBottom: '15px', marginTop: '20px' }}>
-                            <span style={{ fontWeight: 'bold', marginTop: '10px', marginLeft: '15px', fontSize: '1.1rem' }}>{`[${getType(post["type"], false)}] ${post["name"]}`}</span>
+                            <span style={{ fontWeight: 'bold', marginTop: '10px', marginLeft: '15px', fontFamily: 'sans-serif', fontSize: '1.05rem' }}>{`[${getType(post["type"], false)}] ${post["name"]}`}</span>
                             <div style={{ marginTop: '10px', display: 'flex' }}>
                         <span>
                             <span style={{ marginLeft: '15px' }}>작성자</span>
@@ -635,7 +648,7 @@ export default function Forum() {
                                         e.preventDefault();
                                     }}>
                                         <span style={{ marginLeft: '1.2%' }}>아이디 <span style={{ fontWeight: 'bold' }}>{userInf["id"]}</span>로 등록됩니다.</span>
-                                        <textarea style={{ padding: '5px', marginTop: '10px', height: '50px', margin: '1%', fontFamily: 'suite', fontSize: '1rem', resize: 'none' }} placeholder={"타인의 권리를 침해하거나 명예를 훼손하는 댓글은 서버법률에 따라 처벌 받으실 수 있습니다."} value={comment} onChange={(e) => setComment(e.target.value)}/>
+                                        <textarea style={{ padding: '5px', marginTop: '10px', height: '50px', margin: '1%', fontFamily: 'sans-serif', fontSize: '0.95rem', resize: 'none' }} placeholder={"타인의 권리를 침해하거나 명예를 훼손하는 댓글은 서버법률에 따라 처벌 받으실 수 있습니다."} value={comment} onChange={(e) => setComment(e.target.value)}/>
                                         <input type="submit" value={"댓글 등록"} style={{ width: '150px', margin: '1%', padding: '1%', fontFamily: 'suite', fontSize: '1.01rem', fontWeight: 'bold', cursor: 'pointer' }}/>
                                     </form>
                                 )

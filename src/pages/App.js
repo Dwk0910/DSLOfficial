@@ -209,72 +209,79 @@ function App() {
         ); break;
         default: window.location.assign(".?pid=er404"); break;
     }
-  return (
-      <div style={{ width: '1000px', backgroundColor: 'white' }}>
-          <div style={{ position: 'fixed', backgroundColor: 'white', width: '1000px', zIndex: '1' }}>
-              <img src={img_title} alt="" style={{ width: "500px", marginLeft: '50px', cursor: 'pointer' }} onClick={() => {
-                  window.location.assign('.');
-              }}/>
-              <span style={{ borderTop: '1px solid gray', display: 'flex', width: '100%' }}></span>
-          </div>
-          {/* 배너 레이아웃 공간 확보용 더미 */}
-          <div style={{ height: '10px', width: '100%' }}></div>
 
-          {/* 배너 이미지 자체는 흐름에서 제거 (absolute로 띄움) */}
-          <div style={{
-              position: 'absolute',
-              top: '80px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '1000px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              zIndex: '0',
-          }}>
-              <AnimatePresence mode={"wait"}>
-                  <motion.div
-                      key={currentBanner}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 1 }}
-                      style={{ width: '90.9%' }}
-                  >
-                      <img
-                          src={bannerSourceList[currentBanner]}
-                          alt="banner"
-                          width="100%"
-                          height="180px"
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => window.open(bannerLinkList[currentBanner])}
-                      />
-                  </motion.div>
-              </AnimatePresence>
-              <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', width: '90.9%', marginTop: '2px', marginRight: '15px' }}>
-                  <span className={"hoverstyle"} style={{ marginRight: '20px', fontFamily: 'suite' }} onClick={() => {
-                      clearInterval(intervalId.current);
-                      setCurrentBanner((currentBanner <= 0) ? bannerSourceList.length - 1 : currentBanner - 1);
-                  }}>{"<"}</span>
-                  <span className={"hoverstyle"} style={{ fontFamily: 'suite' }} onClick={() => {
-                      clearInterval(intervalId.current);
-                      setCurrentBanner((currentBanner >= bannerSourceList.length - 1) ? 0 : currentBanner + 1);
-                  }}>{">"}</span>
-              </div>
-          </div>
-          <div style={{ paddingTop: '280px' }}></div>
-          <Topmenu/>
-          <div style={{ width: '100%', minHeight: '70vh', display: 'flex', justifyContent: 'center' }}>
-              {page}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'white', width: '100%', borderTop: '1px solid gray', marginTop: '10px', paddingTop: '25px', paddingBottom: '25px', color: 'black', fontFamily: 'suite' }}>
-              <span style={{ fontWeight: 'bold', fontSize: '1.5rem', marginLeft: '25px' }}>DSLWeb</span>
-              <span style={{ fontWeight: 'bold', marginLeft: '25px' }}>Designed by Dwk0910</span>
-              <span style={{ marginLeft: '25px' }}>Copyright 2025. DSL All rights reserved.</span>
-              <span style={{ marginLeft: '25px', marginTop: '10px', textDecoration: 'underline' }}>서버법률은 이곳에서도 똑같이 적용받습니다. 글 작성에 유의해주세요!</span>
-          </div>
-      </div>
-  );
+    // 임시
+    const width = window.innerWidth;
+    const style_rootdiv = (width >= 1000) ? { width: '100vw', display: 'flex', justifyContent: 'center' } : { width: '100vw', display: 'flex', justifyContent: 'left' }
+
+    return (
+        <div style={ style_rootdiv }>
+            <div style={{ width: '1000px', backgroundColor: 'white' }}>
+                <div style={{ position: 'fixed', backgroundColor: 'white', width: '1000px', zIndex: '1' }}>
+                    <img src={img_title} alt="" style={{ width: "500px", marginLeft: '50px', cursor: 'pointer' }} onClick={() => {
+                        window.location.assign('.');
+                    }}/>
+                    <span style={{ borderTop: '1px solid gray', display: 'flex', width: '100%' }}></span>
+                </div>
+                {/* 배너 레이아웃 공간 확보용 더미 */}
+                <div style={{ height: '10px', width: '100%' }}></div>
+
+                {/* 배너 이미지 자체는 흐름에서 제거 (absolute로 띄움) */}
+                <div style={{
+                    position: 'absolute',
+                    top: '80px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '1000px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    zIndex: '0',
+                }}>
+                    <AnimatePresence mode={"wait"}>
+                        <motion.div
+                            key={currentBanner}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 1 }}
+                            style={{ width: '90.9%' }}
+                        >
+                            <img
+                                src={bannerSourceList[currentBanner]}
+                                alt="banner"
+                                width="100%"
+                                height="180px"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => window.open(bannerLinkList[currentBanner])}
+                            />
+                        </motion.div>
+                    </AnimatePresence>
+                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', width: '90.9%', marginTop: '2px', marginRight: '15px' }}>
+                    <span className={"hoverstyle"} style={{ marginRight: '20px', fontFamily: 'suite' }} onClick={() => {
+                        clearInterval(intervalId.current);
+                        setCurrentBanner((currentBanner <= 0) ? bannerSourceList.length - 1 : currentBanner - 1);
+                    }}>{"<"}</span>
+                        <span className={"hoverstyle"} style={{ fontFamily: 'suite' }} onClick={() => {
+                            clearInterval(intervalId.current);
+                            setCurrentBanner((currentBanner >= bannerSourceList.length - 1) ? 0 : currentBanner + 1);
+                        }}>{">"}</span>
+                    </div>
+                </div>
+                <div style={{ paddingTop: '280px' }}></div>
+                <Topmenu/>
+                <div style={{ width: '100%', minHeight: '70vh', display: 'flex', justifyContent: 'center' }}>
+                    { page }
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'white', width: '100%', borderTop: '1px solid gray', marginTop: '10px', paddingTop: '25px', paddingBottom: '25px', color: 'black', fontFamily: 'suite' }}>
+                    <span style={{ fontWeight: 'bold', fontSize: '1.5rem', marginLeft: '25px' }}>DSLWeb</span>
+                    <span style={{ fontWeight: 'bold', marginLeft: '25px' }}>Designed by Dwk0910</span>
+                    <span style={{ marginLeft: '25px' }}>Copyright 2025. DSL All rights reserved.</span>
+                    <span style={{ marginLeft: '25px', marginTop: '10px', textDecoration: 'underline' }}>서버법률은 이곳에서도 똑같이 적용받습니다. 글 작성에 유의해주세요!</span>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export default App;
