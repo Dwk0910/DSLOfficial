@@ -2,7 +2,7 @@ import * as React from "react";
 import $ from 'jquery';
 import MDEdit from "@uiw/react-md-editor";
 
-import { Trash, Pencil } from 'lucide-react';
+import { Trash, Pencil, CornerDownRight } from 'lucide-react';
 
 import banner from '../docs/banners/freeforum_banner.png';
 
@@ -28,6 +28,7 @@ export default function Forum() {
     // only for ?pid=2&t=XXX
     const [post, setPost] = useState(undefined);
     const [comments, setComments] = useState(undefined);
+    const [doubleCommentField, setDoubleCommentField] = useState({});
 
     const [loading, setLoading] = useState(true);
     const [userInf, setUserInf] = useState();
@@ -38,6 +39,8 @@ export default function Forum() {
 
     // For comments
     const [comment, setComment] = useState("");
+    const [doubleComment, setDoubleComment] = useState("");
+
 
     useEffect(() => {
         getUserInfo().then((e) => {
@@ -299,43 +302,201 @@ export default function Forum() {
             // 게시글 보기
             document.documentElement.setAttribute("data-color-mode", "light");
 
-            const commentElements = (commentLengths[post["t"]] !== 0) ? (
-                comments.map((e, idx) => {
-                    let style = { display: 'flex', flexDirection: 'row', width: '100%', padding: '1% 0 1% 0', borderBottom: '1px solid gray' }
+            let commentElements = [];
+            if (commentLengths[post["t"]] !== 0) {
+                comments.forEach((e, idx) => {
+                    let style = {
+                        display: 'flex',
+                        flexDirection: 'row',
+                        width: '100%',
+                        padding: '1% 0 1% 0',
+                        borderBottom: '1px solid gray'
+                    }
                     if (e["content"] === "삭제된 댓글입니다.") style["backgroundColor"] = "rgba(0, 0, 0, 0.07)";
 
-                    return (
-                        <span key={idx} style={style}>
-                            <div style={{ marginLeft: '10px', width: '200px' }}>{ e["author"] }</div>
-                            <div style={{ width: '63%', overflowWrap: "break-word" }}>{ e["content"] }</div>
-                            <div style={{ marginLeft: '2%' }}>{ e["date"].replaceAll("-", ".") }</div>
-                            { (e["author"] === userInf["id"] && e["content"] !== "삭제된 댓글입니다.") ? <span className={"posthoverstyle"} style={{ marginLeft: '7px', height: '30px' }} onClick={() => {
-                                if (window.confirm("댓글을 삭제하시겠습니까?")) {
-                                    $.ajax({
-                                        type: "POST",
-                                        url: "https://neatorebackend.kro.kr/dslofficial/deleteComment",
-                                        contentType: "application/json; charset=utf-8",
-                                        data: JSON.stringify({
-                                            CTPD: process.env.REACT_APP_CTPD,
-                                            t: getURLString("t"),
-                                            ucid: e["ucid"]
-                                        })
-                                    }).then((r) => {
-                                        if (JSON.parse(r)["status"] === "true") {
-                                            alert("삭제되었습니다.");
-                                            window.location.reload();
+                    // 대댓글 Element
+                    let doubleCommentElement = [];
+                    comments.forEach((doubleComment, doubleCommentIdx) => {
+                        if (doubleComment["basedcomment"] === e["ucid"]) {
+                            const divStyle = (doubleCommentElement.length === 0) ? {
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                width: '100%',
+                                marginTop: '10px'
+                            } : { display: 'flex', flexDirection: 'row', justifyContent: 'center', width: '100%' };
+
+                            doubleCommentElement.push(
+                                // 대댓글 출력
+                                <div key={doubleCommentIdx} style={divStyle}>
+                                    <div style={{
+                                        backgroundColor: 'rgba(100, 100, 100, 0.2)',
+                                        width: '90%',
+                                        padding: "1% 0 1% 0",
+                                        borderBottom: '1px solid gray',
+                                        display: 'flex'
+                                    }}>
+                                        <CornerDownRight size={13} style={{marginLeft: '25px', color: '#072bd9'}}/>
+                                        <div style={{width: "200px"}}>{doubleComment["author"]}</div>
+                                        <div style={{
+                                            width: "430px",
+                                            overflowWrap: "break-word"
+                                        }}>{doubleComment["content"]}</div>
+                                        <div
+                                            style={{marginLeft: "20px"}}>{doubleComment["date"].replaceAll("-", ".")}</div>
+                                        {(doubleComment["author"] === userInf["id"] && doubleComment["content"] !== "삭제된 댓글입니다.") ?
+                                            <span className={"posthoverstyle"} style={{marginLeft: '7px'}}
+                                                  onClick={() => {
+                                                      if (window.confirm("댓글을 삭제하시겠습니까?")) {
+                                                          $.ajax({
+                                                              type: "POST",
+                                                              url: "https://neatorebackend.kro.kr/dslofficial/deleteComment",
+                                                              contentType: "application/json; charset=utf-8",
+                                                              data: JSON.stringify({
+                                                                  CTPD: process.env.REACT_APP_CTPD,
+                                                                  t: getURLString("t"),
+                                                                  ucid: doubleComment["ucid"]
+                                                              })
+                                                          }).then((r) => {
+                                                              if (JSON.parse(r)["status"] === "true") {
+                                                                  alert("삭제되었습니다.");
+                                                                  window.location.reload();
+                                                              }
+                                                          });
+                                                      }
+                                                  }}>
+                                                <Trash size={20}/>
+                                            </span> : ""
                                         }
-                                    });
+                                    </div>
+                                </div>
+                            );
+                        }
+                    });
+
+                    if (e["basedcomment"] === "none") {
+                        // 일반댓글(답글아님) 출력
+                        commentElements.push(
+                            <div key={idx}>
+                            <span style={style}>
+                                <div style={{marginLeft: '10px', width: '200px'}}>{e["author"]}</div>
+                                <div style={{width: '63%', overflowWrap: "break-word", cursor: "pointer"}}
+                                     onClick={() => {
+                                         // 대댓글 작성 공간 상태 true 추가
+                                         setDoubleCommentField(prev => ({
+                                             ...prev,
+                                             [e["ucid"]]: (!doubleCommentField?.[e["ucid"]])
+                                         }));
+                                     }}>{e["content"]}</div>
+                                <div style={{marginLeft: '2%'}}>{e["date"].replaceAll("-", ".")}</div>
+                                {(e["author"] === userInf["id"] && e["content"] !== "삭제된 댓글입니다.") ?
+                                    <span className={"posthoverstyle"} style={{marginLeft: '7px'}} onClick={() => {
+                                        if (window.confirm("댓글을 삭제하시겠습니까?")) {
+                                            $.ajax({
+                                                type: "POST",
+                                                url: "https://neatorebackend.kro.kr/dslofficial/deleteComment",
+                                                contentType: "application/json; charset=utf-8",
+                                                data: JSON.stringify({
+                                                    CTPD: process.env.REACT_APP_CTPD,
+                                                    t: getURLString("t"),
+                                                    ucid: e["ucid"]
+                                                })
+                                            }).then((r) => {
+                                                if (JSON.parse(r)["status"] === "true") {
+                                                    alert("삭제되었습니다.");
+                                                    window.location.reload();
+                                                }
+                                            });
+                                        }
+                                    }}><Trash size={20}/></span> : ""
                                 }
-                            }}><Trash size={20}/></span> : "" }
-                        </span>
-                    );
-                })
-            ) : (
-                <div style={{ marginTop: '1%' }}>
-                    <span>댓글이 없습니다</span>
-                </div>
-            );
+                            </span>
+                                <span>
+                                {doubleCommentElement}
+                            </span>
+                                {
+                                    (doubleCommentField?.[e["ucid"]]) ? (
+                                        // 대댓글 작성 필드 출력
+                                        <div style={{
+                                            width: '100%',
+                                            backgroundColor: 'rgba(44, 190, 223, 0.2)',
+                                            display: 'flex',
+                                            flexDirection: "column",
+                                            paddingTop: '10px',
+                                            margin: '1% 0 1% 0',
+                                            border: '1px solid gray'
+                                        }}>
+                                            <span style={{marginLeft: '1.2%'}}><span
+                                                style={{fontWeight: 'bold'}}>{`${e["author"]}`}</span>님에게 답글 남기기</span>
+                                            <textarea style={{
+                                                padding: '5px',
+                                                marginTop: '10px',
+                                                height: '50px',
+                                                margin: '1%',
+                                                fontFamily: 'suite',
+                                                fontSize: '1rem',
+                                                resize: 'none'
+                                            }} placeholder={"타인의 권리를 침해하거나 명예를 훼손하는 댓글은 서버법률에 따라 처벌 받으실 수 있습니다."}
+                                                      value={doubleComment}
+                                                      onChange={(e) => setDoubleComment(e.target.value)}/>
+                                            <input type="button" value={"답글 등록"} style={{
+                                                width: '150px',
+                                                margin: '1%',
+                                                padding: '1%',
+                                                fontFamily: 'suite',
+                                                fontSize: '1.01rem',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer'
+                                            }} onClick={() => {
+                                                if (doubleComment === "") {
+                                                    alert("내용을 입력해주세요");
+                                                    e.preventDefault();
+                                                    return;
+                                                }
+
+                                                if (doubleComment === "삭제된 댓글입니다.") {
+                                                    alert("댓글로 등록할 수 없는 내용입니다.");
+                                                    e.preventDefault();
+                                                    return;
+                                                }
+
+                                                if (window.confirm("답글로 등록하시겠습니까?")) {
+                                                    const date = new Date();
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        url: "https://neatorebackend.kro.kr/dslofficial/addComment",
+                                                        contentType: "application/json; charset=utf-8",
+                                                        data: JSON.stringify({
+                                                            CTPD: process.env.REACT_APP_CTPD,
+                                                            t: getURLString("t"),
+                                                            basedComment: e["ucid"],
+                                                            author: userInf["id"],
+                                                            date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+                                                            content: doubleComment
+                                                        })
+                                                    }).then((response) => {
+                                                        if (JSON.parse(response)["status"] === "true") {
+                                                            alert("답글이 등록되었습니다.");
+                                                            window.location.reload();
+                                                        } else console.log(response);
+                                                    });
+                                                }
+                                            }}/>
+                                        </div>
+                                    ) : ""
+                                }
+                            </div>
+                        );
+                    } else {
+                    }
+                });
+            } else {
+                commentElements.push(
+                    <div style={{marginTop: '1%'}}>
+                        <span>댓글이 없습니다</span>
+                    </div>
+                );
+            }
 
             if (post) {
                 return (
