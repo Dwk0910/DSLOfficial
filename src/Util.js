@@ -121,9 +121,9 @@ export const getType = (type, isHtoE) => {
 
 export const getType_Req = (typeName) => {
     switch(typeName) {
-        case "lawreq_new": return ("법률추가신청");
-        case "lawreq_delete": return ("법률제거신청");
-        case "lawreq_edit": return ("법률수정신청");
+        case "lawreq_new": return "법률추가신청";
+        case "lawreq_delete": return "법률제거신청";
+        case "lawreq_edit": return "법률수정신청";
         case "servreq": return "서버건의";
         case "namereq": return "이름변경신청";
         default: return getType;
@@ -136,4 +136,9 @@ export const shortenText = (text, maxLength = 20) => {
     } else {
         return text;
     }
+}
+
+export const convertDate = (date_orig) => {
+    const year = date_orig.getFullYear(), month = date_orig.getMonth() + 1, day = date_orig.getDate(), hour = date_orig.getHours(), minute = date_orig.getMinutes();
+    return `${year}-${month}-${day} ${(hour.toString().length === 1) ? "0" + hour.toString() : hour.toString()}:${(minute.toString().length === 0) ? "0" + minute.toString() : minute.toString()}`;
 }

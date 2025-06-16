@@ -3,7 +3,7 @@ import $ from 'jquery';
 import banner from '../docs/banners/management_banner.png';
 import Loading from "../component/Loading";
 
-import {getPermission, getType, getType_Req, getURLString} from "../Util";
+import {convertDate, getPermission, getType, getType_Req, getURLString} from "../Util";
 import {useEffect, useState} from "react";
 
 import sha256 from 'sha256';
@@ -105,7 +105,7 @@ export default function Management(props) {
                                         id: id,
                                         pwd: pwd,
                                         perm: perm,
-                                        date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+                                        date: convertDate(date)
                                     })
                                 }).then((r) => {
                                     if (JSON.parse(r)["status"] === "true") {

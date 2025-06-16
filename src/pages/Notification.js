@@ -12,7 +12,7 @@ import {
     LocalStorage,
     encodeUrlSafeBase64,
     decodeUrlSafeBase64,
-    getType
+    getType, convertDate
 } from "../Util";
 
 import Loading from '../component/Loading';
@@ -218,7 +218,7 @@ export default function Notification() {
                                         type: "notification",
                                         name: title,
                                         author: userInf["id"],
-                                        date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+                                        date: convertDate(date),
                                         content: mdValue
                                     })
                                 }).then((response) => {

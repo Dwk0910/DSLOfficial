@@ -3,7 +3,7 @@ import $ from 'jquery';
 
 import MDEdit from '@uiw/react-md-editor';
 
-import { getURLString, getUserInfo, getType_Req } from '../Util';
+import {getURLString, getUserInfo, getType_Req, convertDate} from '../Util';
 import reqcentre_banner from '../docs/banners/reqcentre_banner.png';
 
 import Loading from '../component/Loading';
@@ -129,7 +129,7 @@ export default function ReqCentre() {
                                     CTPD: process.env.REACT_APP_CTPD,
                                     type: "servreq",
                                     member: userInf["id"],
-                                    date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+                                    date: convertDate(date),
                                     content: mdValue
                                 })
                             }).then((response) => {
@@ -183,7 +183,7 @@ export default function ReqCentre() {
                                 CTPD: process.env.REACT_APP_CTPD,
                                 type: "namereq",
                                 member: userInf["id"],
-                                date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+                                date: convertDate(date),
                                 content: `아이디 변경 요청 : ${e.target.querySelector("#t").value}`
                             })
                         }).then((response) => {
