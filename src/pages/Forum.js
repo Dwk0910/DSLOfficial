@@ -20,6 +20,8 @@ import {
 } from "../Util";
 
 export default function Forum() {
+    document.title = "DSL OFFICIAL - 자유게시판";
+
     const [commentLengths, setCommentLengths] = useState(undefined);
 
     // only for ?pid=2
@@ -131,7 +133,16 @@ export default function Forum() {
                 <div key={item["t"]} style={{ width: '100%', display: 'flex', alignItems: 'center', height: '30px', borderBottom: '1px solid gray' }}>
                     <div style={{ textAlign: 'center', width: '100px' }}>{ item["t"] }</div>
                     <div style={{ textAlign: 'center', width: '120px' }}>{ getType(item["type"]) }</div>
-                    <div style={{ textAlign: 'left', width: '400px' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>{ shortenText(item["name"], 32) + ` ${(commentLengths[item["t"]] !== 0) ? "[" + commentLengths[item["t"]] + "]" : ""}` }</div>
+                    <div style={{ textAlign: 'left', width: '400px' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>
+                        {
+                            shortenText(item["name"], 32)
+                        }
+                        {
+                            (commentLengths[item["t"]] !== 0) ? (
+                                <span style={{ paddingLeft: '5px', color: 'gray' }}>[{commentLengths[item["t"]]}]</span>
+                            ) : ""
+                        }
+                    </div>
                     <div style={{ textAlign: 'center', width: '150px' }}>{ item["author"] }</div>
                     <div style={{ textAlign: 'center', width: '150px' }}>{ item["date"].replaceAll("-", ".") }</div>
                 </div>
@@ -302,6 +313,8 @@ export default function Forum() {
             // 게시글 보기
             document.documentElement.setAttribute("data-color-mode", "light");
 
+            // ==================[ COMMENT ]==================
+
             let commentElements = [];
             if (commentLengths[post["t"]] !== 0) {
                 comments.forEach((e, idx) => {
@@ -318,13 +331,12 @@ export default function Forum() {
                     let doubleCommentElement = [];
                     comments.forEach((doubleComment, doubleCommentIdx) => {
                         if (doubleComment["basedcomment"] === e["ucid"]) {
-                            const divStyle = (doubleCommentElement.length === 0) ? {
+                            const divStyle = {
                                 display: 'flex',
                                 flexDirection: 'row',
                                 justifyContent: 'center',
-                                width: '100%',
-                                marginTop: '10px'
-                            } : { display: 'flex', flexDirection: 'row', justifyContent: 'center', width: '100%' };
+                                width: '100%'
+                            };
 
                             doubleCommentElement.push(
                                 // 대댓글 출력
@@ -336,7 +348,7 @@ export default function Forum() {
                                         borderBottom: '1px solid gray',
                                         display: 'flex'
                                     }}>
-                                        <CornerDownRight size={13} style={{marginLeft: '25px', color: '#072bd9'}}/>
+                                        <CornerDownRight size={13} style={{marginLeft: '25px', marginRight: '5px', color: '#072bd9'}}/>
                                         <div style={{width: "200px"}}>{doubleComment["author"]}</div>
                                         <div style={{
                                             width: "430px",
@@ -375,18 +387,28 @@ export default function Forum() {
                     });
 
                     if (e["basedcomment"] === "none") {
+                        // 비로그인 상태, 지워진 댓글에선 대댓추가 불가
+                        const canAddDoubleComment = (userInf["id"] !== "userstatus_unlogined" && e["content"] !== "삭제된 댓글입니다.");
+                        const contentStyle = (canAddDoubleComment) ? {
+                            width: '63%', overflowWrap: "break-word", cursor: "pointer"
+                        } : {
+                            width: '63%', overflowWrap: "break-word"
+                        };
+
                         // 일반댓글(답글아님) 출력
                         commentElements.push(
                             <div key={idx}>
                             <span style={style}>
                                 <div style={{marginLeft: '10px', width: '200px'}}>{e["author"]}</div>
-                                <div style={{width: '63%', overflowWrap: "break-word", cursor: "pointer"}}
+                                <div style={ contentStyle }
                                      onClick={() => {
-                                         // 대댓글 작성 공간 상태 true 추가
-                                         setDoubleCommentField(prev => ({
-                                             ...prev,
-                                             [e["ucid"]]: (!doubleCommentField?.[e["ucid"]])
-                                         }));
+                                         if (canAddDoubleComment) {
+                                             // 대댓글 작성 공간 상태 true 추가
+                                             setDoubleCommentField(prev => ({
+                                                 ...prev,
+                                                 [e["ucid"]]: (!doubleCommentField?.[e["ucid"]])
+                                             }));
+                                         }
                                      }}>{e["content"]}</div>
                                 <div style={{marginLeft: '2%'}}>{e["date"].replaceAll("-", ".")}</div>
                                 {(e["author"] === userInf["id"] && e["content"] !== "삭제된 댓글입니다.") ?
@@ -411,9 +433,13 @@ export default function Forum() {
                                     }}><Trash size={20}/></span> : ""
                                 }
                             </span>
-                                <span>
-                                {doubleCommentElement}
-                            </span>
+                                {
+                                    (doubleCommentElement.length !== 0) ? (
+                                        <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                                            {doubleCommentElement}
+                                        </div>
+                                    ) : ""
+                                }
                                 {
                                     (doubleCommentField?.[e["ucid"]]) ? (
                                         // 대댓글 작성 필드 출력
@@ -450,13 +476,11 @@ export default function Forum() {
                                             }} onClick={() => {
                                                 if (doubleComment === "") {
                                                     alert("내용을 입력해주세요");
-                                                    e.preventDefault();
                                                     return;
                                                 }
 
                                                 if (doubleComment === "삭제된 댓글입니다.") {
                                                     alert("댓글로 등록할 수 없는 내용입니다.");
-                                                    e.preventDefault();
                                                     return;
                                                 }
 
@@ -492,11 +516,13 @@ export default function Forum() {
                 });
             } else {
                 commentElements.push(
-                    <div style={{marginTop: '1%'}}>
+                    <div key={0} style={{marginTop: '1%'}}>
                         <span>댓글이 없습니다</span>
                     </div>
                 );
             }
+
+            // ==================[ POST ]==================
 
             if (post) {
                 return (
@@ -566,11 +592,12 @@ export default function Forum() {
                             <span style={{ fontWeight: 'bold' }}>개</span>
                         </div>
                         <div style={{ width: '90.9%', marginBottom: '5px', fontFamily: 'suite' }}>
+                            { commentElements }
                             {
                                 (userInf["id"] === "userstatus_unlogined") ? (
                                     ""
                                 ) : (
-                                    <form style={{ paddingTop: '10px', display: 'flex', flexDirection: 'column', backgroundColor: "rgba(178, 237, 189, 0.4)" }} onSubmit={(e) => {
+                                    <form style={{ paddingTop: '10px', marginTop: '60px', borderTop: "2px solid skyblue", borderBottom: "2px solid skyblue", display: 'flex', flexDirection: 'column', backgroundColor: "rgba(178, 237, 189, 0.4)" }} onSubmit={(e) => {
                                         if (comment === "") {
                                             alert("내용을 입력해주세요");
                                             e.preventDefault();
@@ -613,7 +640,6 @@ export default function Forum() {
                                     </form>
                                 )
                             }
-                            { commentElements }
                         </div>
                     </div>
                 );
