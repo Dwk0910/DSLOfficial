@@ -10,6 +10,7 @@ import Loading from '../component/Loading';
 
 import { useState, useEffect, useCallback } from 'react';
 import {
+    convertDate,
     decodeUrlSafeBase64,
     encodeUrlSafeBase64,
     getType,
@@ -42,7 +43,6 @@ export default function Forum() {
     // For comments
     const [comment, setComment] = useState("");
     const [doubleComment, setDoubleComment] = useState("");
-
 
     useEffect(() => {
         getUserInfo().then((e) => {
@@ -131,11 +131,11 @@ export default function Forum() {
         postList.forEach((item) => {
             elementArray.push(
                 <div key={item["t"]} style={{ width: '100%', display: 'flex', alignItems: 'center', height: '30px', borderBottom: '1px solid gray' }}>
-                    <div style={{ textAlign: 'center', width: '100px' }}>{ item["t"] }</div>
-                    <div style={{ textAlign: 'center', width: '120px' }}>{ getType(item["type"]) }</div>
-                    <div style={{ textAlign: 'left', width: '400px', fontFamily: 'sans-serif', fontSize: '0.95rem' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>
+                    <div style={{ textAlign: 'center', width: '80px' }}>{ item["t"] }</div>
+                    <div style={{ textAlign: 'center', width: '100px' }}>{ getType(item["type"]) }</div>
+                    <div style={{ textAlign: 'left', width: '440px', fontFamily: 'sans-serif', fontSize: '0.92rem' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>
                         {
-                            shortenText(item["name"], 32)
+                            shortenText(item["name"], 33)
                         }
                         {
                             (commentLengths[item["t"]] !== 0) ? (
@@ -171,9 +171,9 @@ export default function Forum() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', fontFamily: 'suite', minHeight: '500px', marginTop: '20px' }}>
                         <div style={{ width: '100%', display: 'flex', alignItems: 'center', height: '40px', borderBottom: '1px solid gray', borderTop: '1px solid gray' }}>
-                            <div style={{ textAlign: 'center', width: '100px' }}>작성번호</div>
-                            <div style={{ textAlign: 'center', width: '120px' }}>말머리</div>
-                            <div style={{ textAlign: 'center', width: '400px' }}>제목</div>
+                            <div style={{ textAlign: 'center', width: '80px' }}>작성번호</div>
+                            <div style={{ textAlign: 'center', width: '100px' }}>말머리</div>
+                            <div style={{ textAlign: 'center', width: '440px' }}>제목</div>
                             <div style={{ textAlign: 'center', width: '150px' }}>글쓴이</div>
                             <div style={{ textAlign: 'center', width: '150px' }}>작성일</div>
                         </div>
@@ -233,7 +233,7 @@ export default function Forum() {
                                             type: getType(header, true),
                                             name: title,
                                             author: userInf["id"],
-                                            date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`,
+                                            date: convertDate(date),
                                             content: mdValue
                                         })
                                     }).then((r) => {
@@ -349,14 +349,14 @@ export default function Forum() {
                                         display: 'flex'
                                     }}>
                                         <CornerDownRight size={13} style={{marginLeft: '25px', marginRight: '5px', color: '#072bd9'}}/>
-                                        <div style={{ width: "200px", display: 'flex', alignItems: 'center' }}>
-                                            {(doubleComment["author"] === post["author"]) ? (
-                                                <Crown size={10} style={{ color: "yellow", borderRadius: '50%', padding: '3px', marginRight: '7px', border: '1px solid yellow' }}/>
-                                            ) : ""}
+                                        <div style={{ width: "120px", display: 'flex', alignItems: 'center' }}>
                                             {doubleComment["author"]}
+                                            {(doubleComment["author"] === post["author"]) ? (
+                                                <Crown size={10} style={{ color: "#948d00", borderRadius: '50%', padding: '3px', marginRight: '7px', marginLeft: '5px', border: '1px solid yellow' }}/>
+                                            ) : ""}
                                         </div>
                                         <div style={{
-                                            width: "430px",
+                                            width: "450px",
                                             overflowWrap: "break-word",
                                             fontFamily: 'sans-serif',
                                             fontSize: '0.95rem'
@@ -397,9 +397,9 @@ export default function Forum() {
                         // 비로그인 상태, 지워진 댓글에선 대댓추가 불가
                         const canAddDoubleComment = (userInf["id"] !== "userstatus_unlogined" && e["content"] !== "삭제된 댓글입니다.");
                         const contentStyle = (canAddDoubleComment) ? {
-                            width: '63%', overflowWrap: "break-word", fontFamily: 'sans-serif', fontSize: '0.95rem', cursor: "pointer"
+                            width: '58%', overflowWrap: "break-word", fontFamily: 'sans-serif', fontSize: '0.95rem', cursor: "pointer"
                         } : {
-                            width: '63%', overflowWrap: "break-word", fontFamily: 'sans-serif', fontSize: '0.95rem'
+                            width: '58%', overflowWrap: "break-word", fontFamily: 'sans-serif', fontSize: '0.95rem'
                         };
 
                         // 일반댓글(답글아님) 출력
@@ -408,7 +408,7 @@ export default function Forum() {
                             <span style={style}>
                                 <div style={{ marginLeft: '10px', width: "200px", display: 'flex', alignItems: 'center' }}>
                                     {(e["author"] === post["author"]) ? (
-                                        <Crown size={10} style={{ color: "yellow", borderRadius: '50%', padding: '3px', marginRight: '7px', border: '1px solid yellow' }}/>
+                                        <Crown size={10} style={{ color: "#948d00", borderRadius: '50%', padding: '3px', marginRight: '7px', marginLeft: '5px', border: '1px solid yellow' }}/>
                                     ) : ""}
                                     {e["author"]}
                                 </div>
@@ -508,7 +508,7 @@ export default function Forum() {
                                                             t: getURLString("t"),
                                                             basedComment: e["ucid"],
                                                             author: userInf["id"],
-                                                            date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+                                                            date: convertDate(date),
                                                             content: doubleComment
                                                         })
                                                     }).then((response) => {
@@ -634,7 +634,7 @@ export default function Forum() {
                                                     t: getURLString("t"),
                                                     basedComment: "none",
                                                     author: userInf["id"],
-                                                    date: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+                                                    date: convertDate(date),
                                                     content: comment
                                                 })
                                             }).then((response) => {
