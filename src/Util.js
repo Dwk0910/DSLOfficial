@@ -140,5 +140,5 @@ export const shortenText = (text, maxLength = 20) => {
 
 export const convertDate = (date_orig) => {
     const year = date_orig.getFullYear(), month = date_orig.getMonth() + 1, day = date_orig.getDate(), hour = date_orig.getHours(), minute = date_orig.getMinutes();
-    return `${year}-${month}-${day} ${(hour.toString().length === 1) ? "0" + hour.toString() : hour.toString()}:${(minute.toString().length === 0) ? "0" + minute.toString() : minute.toString()}`;
+    return `${year}-${month}-${day} ${(hour.toString().length === 1) ? "0" + hour.toString() : hour.toString()}:${(minute.toString().length === 1) ? "0" + minute.toString() : minute.toString()}`;
 }
