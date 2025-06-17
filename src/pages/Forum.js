@@ -5,6 +5,7 @@ import MDEdit from "@uiw/react-md-editor";
 import { Trash, Pencil, CornerDownRight, Crown } from 'lucide-react';
 
 import banner from '../docs/banners/freeforum_banner.png';
+import wooah from '../docs/Forum/wooah.png';
 
 import Loading from '../component/Loading';
 
@@ -26,6 +27,7 @@ export default function Forum() {
     const [commentLengths, setCommentLengths] = useState(undefined);
 
     // only for ?pid=2
+    const [lastWorkDate, setLastWorkDate] = useState(undefined);
     const [postList, setPostList] = useState(undefined);
 
     // only for ?pid=2&t=XXX
@@ -66,6 +68,13 @@ export default function Forum() {
             setPostList(array.reverse());
             setCommentLengths(JSON.parse(jsonResponse["commentLengths"]));
         });
+
+        $.ajax({
+            type: "POST",
+            url: "https://neatorebackend.kro.kr/dslofficial/getWorkDate"
+        }).then((r) => {
+            setLastWorkDate(r.split(" ")[0] + " " + r.split(" ")[1]);
+        })
     }, []);
 
     useEffect(() => {
@@ -135,11 +144,16 @@ export default function Forum() {
                     <div style={{ textAlign: 'center', width: '100px' }}>{ getType(item["type"]) }</div>
                     <div style={{ textAlign: 'left', width: '440px', fontFamily: 'sans-serif', fontSize: '0.92rem' }} className={"hoverstyle"} onClick={() => window.location.assign(`.?pid=2&t=${item["t"]}`)}>
                         {
-                            shortenText(item["name"], 33)
+                            shortenText(item["name"], 32)
                         }
                         {
                             (commentLengths[item["t"]] !== 0) ? (
                                 <span style={{ paddingLeft: '5px', color: 'gray' }}>[{commentLengths[item["t"]]}]</span>
+                            ) : ""
+                        }
+                        {
+                            (JSON.parse(item["recommend"]).length !== 0) ? (
+                                <span style={{ color: 'darkblue' }}>[{JSON.parse(item["recommend"]).length}]</span>
                             ) : ""
                         }
                     </div>
@@ -166,10 +180,13 @@ export default function Forum() {
                                 <div>
                                     <input type={"button"} value={"게시글 작성"} style={{ fontFamily: 'suite', fontSize: '1.05rem', padding: '4.7%', marginLeft: '50px', width: '200px', cursor: 'pointer' }} onClick={() => window.location.assign(".?pid=2&t=n")}/>
                                 </div>
-                            ) : ("")
+                            ) : ""
                         }
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', fontFamily: 'suite', minHeight: '500px', marginTop: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <span style={{ marginTop: '10px', fontFamily: 'suite' }}>최근 활동 : { (lastWorkDate === "0") ? (<span style={{ color: 'gray' }}>없음</span>) : lastWorkDate }</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', fontFamily: 'suite', minHeight: '500px', marginTop: '20px', marginBottom: '20px' }}>
                         <div style={{ width: '100%', display: 'flex', alignItems: 'center', height: '40px', borderBottom: '1px solid gray', borderTop: '1px solid gray' }}>
                             <div style={{ textAlign: 'center', width: '80px' }}>작성번호</div>
                             <div style={{ textAlign: 'center', width: '100px' }}>말머리</div>
@@ -547,25 +564,29 @@ export default function Forum() {
                         <div style={{ width: '90.9%', display: 'flex', flexDirection: 'column', fontFamily: 'suite', borderTop: '1px solid gray', borderBottom: '1px solid gray', paddingBottom: '15px', marginTop: '20px' }}>
                             <span style={{ fontWeight: 'bold', marginTop: '10px', marginLeft: '15px', fontFamily: 'sans-serif', fontSize: '1.05rem' }}>{`[${getType(post["type"], false)}] ${post["name"]}`}</span>
                             <div style={{ marginTop: '10px', display: 'flex' }}>
-                        <span>
-                            <span style={{ marginLeft: '15px' }}>작성자</span>
-                            <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["author"] }</span>
-                        </span>
                                 <span>
-                            <span style={{ marginLeft: '15px' }}>작성번호</span>
-                            <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["t"] }</span>
-                        </span>
+                                    <span style={{ marginLeft: '15px' }}>작성자</span>
+                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["author"] }</span>
+                                </span>
                                 <span>
-                            <span style={{ marginLeft: '15px' }}>작성일</span>
-                            <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["date"].replaceAll("-", ".") }</span>
-                        </span>
+                                    <span style={{ marginLeft: '15px' }}>작성번호</span>
+                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["t"] }</span>
+                                </span>
                                 <span>
-                            <span style={{ marginLeft: '15px' }}>댓글</span>
-                            <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ commentLengths[post["t"]] }</span>
-                        </span>
+                                    <span style={{ marginLeft: '15px' }}>작성일</span>
+                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ post["date"].replaceAll("-", ".") }</span>
+                                </span>
+                                <span>
+                                    <span style={{ marginLeft: '15px' }}>댓글</span>
+                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ commentLengths[post["t"]] }</span>
+                                </span>
+                                <span>
+                                    <span style={{ marginLeft: '15px' }}>추천</span>
+                                    <span style={{ borderRight: '1px solid gray', padding: '0 15px 0 15px', fontWeight: 'bold' }}>{ JSON.parse(post["recommend"]).length }</span>
+                                </span>
                                 {
                                     (post["author"] === userInf["id"]) ? (
-                                        <div style={{ marginLeft: "250px" }}>
+                                        <div style={{ marginLeft: "160px" }}>
                                     <span className={"postmenuhoverstyle"} onClick={() => {
                                         window.location.assign(`.?pid=2&t=n&et=${getURLString("t")}`);
                                         ls.set("edit_title", encodeUrlSafeBase64(post["name"]));
@@ -597,7 +618,36 @@ export default function Forum() {
                             </div>
                         </div>
                         <div style={{ width: '90.9%' }}>
-                            <MDEdit.Markdown source={ post["content"] } style={{ width: '100%', marginTop: '15px', minHeight: "500px", borderBottom: '1px solid gray', paddingBottom: '25px' }}/>
+                            <MDEdit.Markdown source={ post["content"] } style={{ width: '100%', marginTop: '15px', minHeight: "500px", paddingBottom: '25px' }}/>
+                            {
+                                // 비로그인 상태에서는 추천 불가
+                                (userInf["id"] !== "userstatus_unlogined") ? (
+                                    <div style={{ width: '100%', marginBottom: '40px', display: 'flex', justifyContent: 'center' }}>
+                                        <div style={{ width: '20%', border: '1px solid gray', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '3%' }}>
+                                            <img alt={"wooah"} src={wooah} className={"posthoverstyle"} width={"50px"} style={{ color: 'white', backgroundColor: '#c9c800', padding: '3%', borderRadius: '5px', marginBottom: '10px' }} onClick={() => {
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: "https://neatorebackend.kro.kr/dslofficial/newReco",
+                                                    contentType: "application/json; charset=utf-8",
+                                                    data: JSON.stringify({
+                                                        CTPD: process.env.REACT_APP_CTPD,
+                                                        t: getURLString("t"),
+                                                        id: userInf["id"]
+                                                    })
+                                                }).then((r) => {
+                                                    if (JSON.parse(r)["status"] === "true") {
+                                                        alert("이 글을 추천했습니다.");
+                                                    } else if (JSON.parse(r)["status"] === "idexist") {
+                                                        alert("이 글을 이미 추천하셨습니다.");
+                                                    } else console.log(r);
+                                                });
+                                            }}/>
+                                            <span style={{ fontFamily: 'suite' }}>이 글 추천하기</span>
+                                        </div>
+                                    </div>
+                                ) : ""
+                            }
+                            <div style={{ width: '100%', borderBottom: '1px solid gray' }}></div>
                         </div>
                         <div style={{ marginTop: '10px', borderBottom: '2px solid skyblue', width: '90.9%', paddingBottom: '10px' }}>
                             <span style={{ fontWeight: 'bold' }}>전체 댓글</span>
