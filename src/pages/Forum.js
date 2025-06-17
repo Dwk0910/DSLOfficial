@@ -151,11 +151,6 @@ export default function Forum() {
                                 <span style={{ paddingLeft: '5px', color: 'gray' }}>[{commentLengths[item["t"]]}]</span>
                             ) : ""
                         }
-                        {
-                            (JSON.parse(item["recommend"]).length !== 0) ? (
-                                <span style={{ color: 'darkblue' }}>[{JSON.parse(item["recommend"]).length}]</span>
-                            ) : ""
-                        }
                     </div>
                     <div style={{ textAlign: 'center', width: '150px' }}>{ item["author"] }</div>
                     <div style={{ textAlign: 'center', width: '150px' }}>{ item["date"].replaceAll("-", ".") }</div>
