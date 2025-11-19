@@ -101,7 +101,7 @@ function App() {
         }
         case 'S': {
             page = (<span>리디렉션 중...</span>);
-            window.location.assign("https://dslwiki.kro.kr");
+            window.location.assign("https://wiki.dslofficial.org");
             break;
         }
         case 'm': {
