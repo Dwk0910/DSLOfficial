@@ -39,7 +39,7 @@ export default function Main() {
 
     // Wiki Check
     function checkWikiServerStatus(){
-        fetch("https://dslwiki.kro.kr/ping-wiki.php", { cache: 'no-store' })
+        fetch("https://wiki.dslofficial.org/ping-wiki.php", { cache: 'no-store' })
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
                 if (data.status === "online") setWikiServerStatus("🟢 온라인");
@@ -321,7 +321,7 @@ export default function Main() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', marginTop: '8px', marginLeft: '15px', border: '1px solid gray', padding: '5%', minWidth: '200px', borderRadius: '5px' }}>
                             <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>DSLWiki</span>
-                            <span style={{ fontSize: '0.9rem' }} className={"hoverstyle"} onClick={() => { window.open("https://www.dslwiki.kro.kr/"); }}>https://www.dslwiki.kro.kr</span>
+                            <span style={{ fontSize: '0.9rem' }} className={"hoverstyle"} onClick={() => { window.open("https://wiki.dslofficial.org"); }}>https://wiki.dslofficial.org</span>
                             <span style={{ fontSize: '0.9rem', marginTop: '20px' }}>{ wikiServerStatus }</span>
                         </div>
                     </div>
