@@ -1,70 +1,37 @@
-# Getting Started with Create React App
+# 환영합니다!
+DSL 공식 웹사이트에 오신 여러분을 환영합니다.<br/>
+이제부터 디스코드에서 받던 **서버 요청, 서비스 일부는 이 웹사이트로 이전될 예정**입니다.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### 서버 웹사이트 이용법
+서버 웹사이트는 기본적으로 **로그인을 하셔야** 전체 서비스 이용이 가능합니다. 서버 웹사이트 회원가입은 *@neatore* DM으로 요청 부탁 드립니다.
 
-## Available Scripts
+서버 웹사이트 구동 이후, 순차적으로 디스코드에서 서비스하던 내용 일부를 웹사이트로 옮길 예정이며, 이를 위한 홍보도 진행할 예정이오니, 서버 멤버분들께서는 많은 관심을 부탁드립니다.
 
-In the project directory, you can run:
+기본적으로, 서버 웹사이트는 현재 디스코드에서 받던 서비스 중 **세 가지를 지원할 예정** 입니다. 아래 표를 참고해주세요.
 
-### `npm start`
+| 이름 | 상태 | 설명 |
+| ------ | ----- | ------ |
+| 아이디 변경신청 | 개발완료 | 디스코드 서버 내 `이름변경신청`을 대신함 |
+| 서버건의함 | 개발완료 | 디스코드 서버 내 `서버건의함`을 대신함
+| 법률신청 | 개발중 | 법률의 추가, 삭제, 변경을 요청할 수 있는 창구로 사용될 예정 |
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+위 서비스들은 모바일 UI가 개발되면 전체 웹사이트로 이전할 예정입니다.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+#### 웹사이트 서비스
+- **공지**: 공지사항을 쉽고 빠르게 확인 가능합니다.<br/>추후 디스코드 서버 공지방과 연동할 예정입니다.
+- **자유게시판**: 서버 멤버들이 자유롭게 게시글을 올리고, 멤버들과 소통할 수 있게 만들었습니다. 서버의 `미디어포럼` 방을 대체할 예정입니다.
+- **신청센터**: 위 표 참고
+- **자료실**: 서버에서 공식적으로 운영하는 게임서버를 위한 정보와, 모드, 프로그램을 확인하고 다운로드 받을 수 있는 서비스입니다.
+- **DDM**: 개발중인 서비스입니다. 추후 개발이 완료되면 공지해드리겠습니다.
+- **DSLHUB**: 저희 서버에서 `DCS`에 참가하시는 분들에게 해당되는 내용입니다. 돈 송금, 토지 구매 등의 서비스를 웹에서 가능케 할 예정입니다.
+- **DSLWiki**: 서버 내 역사적 정보, 자료를 모아두는 위키입니다. 누르면 자동으로 [서버위키](https://dslwiki.kro.kr)로 자동 리디렉션 됩니다.
 
-### `npm test`
+### 접속 유의사항
+현재 서버 웹사이트는 *2025년 6월 15일 기준* **데스크탑으로만 정상적인 접속이 가능합니다.** 모바일 UI도 빠른 시일 내에 개발할 예정이오니, 서버 멤버분들의 양해를 바랍니다.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### (기타) 배너 추가 문의
+DSL서버 웹사이트 위에서 돌아가는 배너는 총 3개로, 현재(*2025년 6월 15일*) 기준으로 총 두 개가 등록되어 있습니다.<br/>
+`1920x350` 사이즈로 제작하시면 되고, 배너 추가 문의는 *@neatore* DM으로 부탁드립니다.
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Credits
+*Designed by Dwk0910.*
